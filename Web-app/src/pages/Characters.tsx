@@ -101,23 +101,25 @@ const characters: Character[] = [
       maxSanity: 99,
       temporaryInsanity: false,
       indefiniteInsanity: false,
-      phobias: ['Arachnophobia'],
-      manias: ['Compulsive note-taking']
+      phobias: ['Insomnia'],
+      manias: ['Compulsive smoker']
     },
     skills: [
-      { name: 'Rifle', value: 75, category: 'combat' },
-      { name: 'Rastrear', value: 65, category: 'practical' },
+      { name: 'Rifle', value: 80, category: 'combat' },
+      { name: 'Rastrear', value: 55, category: 'practical' },
       { name: 'Sobrevivência', value: 70, category: 'practical' },
-      { name: 'Persuasão', value: 55, category: 'social' },
-      { name: 'Primeiros Socorros', value: 45, category: 'practical' }
+      { name: 'Pistola', value: 50, category: 'combat' },
+      { name: 'Primeiros Socorros', value: 55, category: 'practical' }
     ],
     equipment: [
       { name: 'Rifle de Elefante', type: 'weapon', description: 'Powerful hunting rifle (3d6+4)' },
-      { name: 'Revolver .45', type: 'weapon', description: 'Nice hand gun (1d10+2)' }
+      { name: 'Revolver .45', type: 'weapon', description: 'Nice hand gun (1d10+2)' },
+      { name: 'Livro sobre fauna e flora do Peru', type: 'book', description: 'Book on flora and fauna of Peru' },
+      { name: 'Kit primeiros socorros', type: 'tool', description: 'First aid kit' }
     ],
-    pulpTalents: ['Atirador de Elite', 'Sobrevivente Nato'],
-    wounds: 12,
-    maxHealth: 12
+    pulpTalents: ['Saque Rápido', 'Recarga Rápida'],
+    wounds: 22,
+    maxHealth: 22
   }
 ];
 

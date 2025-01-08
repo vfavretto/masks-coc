@@ -7,13 +7,15 @@ import {
   Scroll,
   User,
 } from "lucide-react";
-import { useEffect } from "react";
-import fahImg from '../../assets/img/fah.jpeg';
-import kassImg from '../../assets/img/tsu.jpeg';
-import artImg from '../../assets/img/art.jpeg';
-import leoImg from '../../assets/img/leo.jpeg';
-import gabaoImg from '../../assets/img/gabao.jpeg';
-import caliImg from '../../assets/img/caliel.jpg';
+import { useEffect, useState } from "react";
+import fahImg from "../../assets/img/fah.jpeg";
+import kassImg from "../../assets/img/tsu.jpeg";
+import artImg from "../../assets/img/art.jpeg";
+import leoImg from "../../assets/img/leo.jpeg";
+import gabaoImg from "../../assets/img/gabao.jpeg";
+import caliImg from "../../assets/img/caliel.jpg";
+import galleryImg1 from "../../assets/img/TelegrafoPeru.jpeg";
+
 const Home = () => {
   useEffect(() => {
     const textElements = document.querySelectorAll(".flicker");
@@ -25,6 +27,7 @@ const Home = () => {
       }, 2000);
     });
   }, []);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   return (
     <div className="space-y-12 relative min-h-screen">
@@ -34,7 +37,7 @@ const Home = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-black/80 to-transparent" />
         <Moon className="w-16 h-16 text-primary/80 mx-auto mb-6 animate-pulse" />
         <h1 className="text-6xl font-bold mb-6 text-primary font-[MedievalSharp] flicker">
-        Masks of Nyarlathotep
+          Masks of Nyarlathotep
         </h1>
         <p className="text-xl text-gray-400 max-w-2xl mx-auto font-serif italic">
           "That is not dead which can eternal lie,
@@ -121,8 +124,8 @@ const Home = () => {
               image: caliImg,
               role: "O Mestre",
               description:
-                "Mestre de RPG, banqueiro e reptiliano nas horas vagas."
-            }
+                "Mestre de RPG, banqueiro e reptiliano nas horas vagas.",
+            },
           ].map((player) => (
             <div
               key={player.name}
@@ -155,19 +158,33 @@ const Home = () => {
           </h2>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {[1, 2, 3].map((i) => (
+          {[galleryImg1].map((img, i) => (
             <div
               key={i}
-              className="aspect-square bg-black/50 rounded-lg border border-primary/20 overflow-hidden hover:border-primary/40 transition-all duration-300"
+              className="aspect-square bg-black/50 rounded-lg border border-primary/20 overflow-hidden hover:border-primary/40 transition-all duration-300 cursor-pointer"
+              onClick={() => setSelectedImage(img)}
             >
               <img
-                src={`/api/placeholder/300/300`}
+                src={img}
                 alt={`Gallery item ${i}`}
                 className="w-full h-full object-cover opacity-60 hover:opacity-100 transition-opacity duration-300"
               />
             </div>
           ))}
         </div>
+
+        {selectedImage && (
+          <div
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setSelectedImage(null)}
+          >
+            <img
+              src={selectedImage}
+              alt="Gallery preview"
+              className="max-w-full max-h-[90vh] object-contain rounded-lg"
+            />
+          </div>
+        )}
       </section>
 
       <section className="card mt-12 bg-gray-900/80">
