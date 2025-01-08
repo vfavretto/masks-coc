@@ -12,7 +12,7 @@ function App() {
         <Header />
         <main className="container mx-auto px-4 py-8">
           <Routes>
-            <Route path="/" element={<Home />} />
+            <Route path="/masks-coc/" element={<Home />} />
             <Route path="/characters" element={<Characters />} />
             <Route path="/sessions" element={<SessionNotes />} />
             <Route path="/calendar" element={<Calendar />} />

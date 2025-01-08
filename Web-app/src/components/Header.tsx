@@ -7,7 +7,7 @@ const Header = () => {
   const location = useLocation();
 
   const navigation = [
-    { name: 'Home', path: '/' },
+    { name: 'Home', path: '/masks-coc/' },
     { name: 'Characters', path: '/characters' },
     { name: 'Session Notes', path: '/sessions' },
     { name: 'Calendar', path: '/calendar' },
