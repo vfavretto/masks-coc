@@ -8,7 +8,12 @@ import {
   User,
 } from "lucide-react";
 import { useEffect } from "react";
-
+import fahImg from '../../assets/img/fah.jpeg';
+import kassImg from '../../assets/img/tsu.jpeg';
+import artImg from '../../assets/img/art.jpeg';
+import leoImg from '../../assets/img/leo.jpeg';
+import gabaoImg from '../../assets/img/gabao.jpeg';
+import caliImg from '../../assets/img/caliel.jpg';
 const Home = () => {
   useEffect(() => {
     const textElements = document.querySelectorAll(".flicker");
@@ -29,7 +34,7 @@ const Home = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-black/80 to-transparent" />
         <Moon className="w-16 h-16 text-primary/80 mx-auto mb-6 animate-pulse" />
         <h1 className="text-6xl font-bold mb-6 text-primary font-[MedievalSharp] flicker">
-          Máscaras de Nyarlathotep
+        Masks of Nyarlathotep
         </h1>
         <p className="text-xl text-gray-400 max-w-2xl mx-auto font-serif italic">
           "That is not dead which can eternal lie,
@@ -71,29 +76,6 @@ const Home = () => {
 
       <section className="card mt-12">
         <div className="flex items-center gap-3 mb-6">
-          <Camera className="w-8 h-8 text-primary" />
-          <h2 className="heading mb-0 font-[MedievalSharp]">
-            Campaign Gallery
-          </h2>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className="aspect-square bg-black/50 rounded-lg border border-primary/20 overflow-hidden hover:border-primary/40 transition-all duration-300"
-            >
-              <img
-                src={`/api/placeholder/300/300`}
-                alt={`Gallery item ${i}`}
-                className="w-full h-full object-cover opacity-60 hover:opacity-100 transition-opacity duration-300"
-              />
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="card mt-12">
-        <div className="flex items-center gap-3 mb-6">
           <User className="w-8 h-8 text-primary" />
           <h2 className="heading mb-0 font-[MedievalSharp]">Players</h2>
         </div>
@@ -101,39 +83,46 @@ const Home = () => {
           {[
             {
               name: "Gabriel 'Gabão' Oliveira",
-              image: "/api/placeholder/200/200",
+              image: gabaoImg,
               role: "Buff's Bff",
               description:
                 "Ama gatos e tá sempre pronto para espalhar seu amor com os outros.",
             },
             {
               name: "Leonardo 'Leo' de Paula",
-              image: "/api/placeholder/200/200",
+              image: leoImg,
               role: "Entusiasta",
               description:
                 "Apesar de nunca ter muito tempo, ama jogar RPG com os amigos e entra de cabeça.",
             },
             {
               name: "Arthur 'Art' Barone",
-              image: "/api/placeholder/200/200",
+              image: artImg,
               role: "Goblin",
               description:
                 "Especialista em fazer cenas estilosas e divertidas.",
             },
             {
               name: "Victor 'Fah' Favretto",
-              image: "/api/placeholder/200/200",
+              image: fahImg,
               role: "Garoto de Programa",
               description:
                 "Amante dos bons dialogos e pronto pra animar o time.",
             },
             {
               name: "Kassio 'Kass' Gama",
-              image: "/api/placeholder/200/200",
+              image: kassImg,
               role: "Radiante",
               description:
                 "Lindo, inteligente e muito gente boa, um homem perfeito!",
             },
+            {
+              name: "Caliel 'Cali' de Souza",
+              image: caliImg,
+              role: "O Mestre",
+              description:
+                "Mestre de RPG, banqueiro e reptiliano nas horas vagas."
+            }
           ].map((player) => (
             <div
               key={player.name}
@@ -153,6 +142,29 @@ const Home = () => {
                 </div>
                 <p className="text-gray-300 font-serif">{player.description}</p>
               </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="card mt-12">
+        <div className="flex items-center gap-3 mb-6">
+          <Camera className="w-8 h-8 text-primary" />
+          <h2 className="heading mb-0 font-[MedievalSharp]">
+            Campaign Gallery
+          </h2>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="aspect-square bg-black/50 rounded-lg border border-primary/20 overflow-hidden hover:border-primary/40 transition-all duration-300"
+            >
+              <img
+                src={`/api/placeholder/300/300`}
+                alt={`Gallery item ${i}`}
+                className="w-full h-full object-cover opacity-60 hover:opacity-100 transition-opacity duration-300"
+              />
             </div>
           ))}
         </div>
