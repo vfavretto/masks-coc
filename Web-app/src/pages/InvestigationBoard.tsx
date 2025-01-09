@@ -9,6 +9,7 @@ import {
   Edit2,
 } from "lucide-react";
 import { Clue, Connection } from "../types";
+import paperTexture from "../../assets/img/paper-texture.jpg"
 
 const InvestigationBoard = () => {
   const [clues, setClues] = useState<Clue[]>([
@@ -39,6 +40,8 @@ const InvestigationBoard = () => {
   const boardRef = useRef<HTMLDivElement>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingClue, setEditingClue] = useState<Clue | null>(null);
+  const [caseTitle, setCaseTitle] = useState("Miskatonic Mysteries");
+  const [editingTitle, setEditingTitle] = useState(false);
 
   const typeIcons = {
     location: <MapPin className="w-5 h-5" />,
@@ -105,17 +108,38 @@ const InvestigationBoard = () => {
 
   return (
     <div className="relative min-h-screen bg-[#2c2527] text-gray-200">
-      {/* Aged paper texture background */}
-      <div className="absolute inset-0 bg-[url('/paper-texture.jpg')] opacity-20 pointer-events-none" />
+      <div
+        className="absolute inset-0 bg-[#f4d03f] opacity-10 pointer-events-none"
+        style={{
+          backgroundImage: `url(${paperTexture})`,
+          backgroundBlendMode: "multiply",
+          filter: "sepia(50%) contrast(90%)",
+          mixBlendMode: "overlay",
+        }}
+      />
 
       <header className="p-6 bg-black/40 border-b border-primary/20 backdrop-blur-sm">
         <h1 className="text-4xl font-bold text-primary font-[MedievalSharp] mb-2">
           Investigation Board
         </h1>
         <div className="flex justify-between items-center">
-          <p className="text-gray-400 font-serif italic">
-            Case File: Miskatonic Mysteries
-          </p>
+          {editingTitle ? (
+            <input
+              value={caseTitle}
+              onChange={(e) => setCaseTitle(e.target.value)}
+              onBlur={() => setEditingTitle(false)}
+              onKeyDown={(e) => e.key === "Enter" && setEditingTitle(false)}
+              className="bg-transparent border-b text-gray-400 font-serif italic focus:outline-none"
+              autoFocus
+            />
+          ) : (
+            <p
+              onClick={() => setEditingTitle(true)}
+              className="text-gray-400 font-serif italic cursor-pointer hover:text-gray-300"
+            >
+              Case File: {caseTitle}
+            </p>
+          )}
           <button
             onClick={addNewClue}
             className="px-4 py-2 bg-primary/20 text-primary rounded hover:bg-primary/30 transition-all"
