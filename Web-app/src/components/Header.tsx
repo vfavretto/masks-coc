@@ -1,16 +1,16 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Skull, Menu, X } from 'lucide-react';
+import { Skull, Menu, X,  Home, Users, BookOpen, Calendar} from 'lucide-react';
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
 
   const navigation = [
-    { name: 'Home', path: '/masks-coc/' },
-    { name: 'Characters', path: '/characters' },
-    { name: 'Session Notes', path: '/sessions' },
-    { name: 'Calendar', path: '/calendar' },
+    { name: 'Home', path: '/masks-coc/', icon: Home },
+    { name: 'Characters', path: '/characters', icon: Users },
+    { name: 'Session Notes', path: '/sessions', icon: BookOpen },
+    { name: 'Calendar', path: '/calendar', icon: Calendar },
   ];
 
   return (
@@ -29,12 +29,13 @@ const Header = () => {
               <Link
                 key={item.name}
                 to={item.path}
-                className={`px-4 py-2 font-serif text-lg transition-all duration-300
+                className={`flex items-center px-4 py-2 font-serif text-lg space-x-2 transition-all duration-300
                   ${location.pathname === item.path 
                     ? 'text-primary border-b-2 border-primary' 
                     : 'text-gray-400 hover:text-primary hover:border-b-2 hover:border-primary/50'}`}
               >
-                {item.name}
+                <item.icon className="h-4 w-4" />
+                <span>{item.name}</span>
               </Link>
             ))}
           </nav>
