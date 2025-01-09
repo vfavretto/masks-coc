@@ -11,6 +11,7 @@ const Header = () => {
     { name: 'Characters', path: '/characters', icon: Users },
     { name: 'Session Notes', path: '/sessions', icon: BookOpen },
     { name: 'Calendar', path: '/calendar', icon: Calendar },
+    { name: 'Investigation Board', path: '/investigation', icon: Menu },
   ];
 
   return (

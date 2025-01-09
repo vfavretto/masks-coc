@@ -4,6 +4,7 @@ import Home from './pages/Home';
 import Characters from './pages/Characters';
 import SessionNotes from './pages/SessionNotes';
 import Calendar from './pages/Calendar';
+import InvestigationBoard from './pages/InvestigationBoard';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
             <Route path="/characters" element={<Characters />} />
             <Route path="/sessions" element={<SessionNotes />} />
             <Route path="/calendar" element={<Calendar />} />
+            <Route path="/investigation" element={<InvestigationBoard />} />
           </Routes>
         </main>
       </div>
