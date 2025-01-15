@@ -6,7 +6,7 @@ import {
   Edit2,
   Save,
 } from "lucide-react";
-import InvestigationBoard from "./InvestigationBoard";
+import InvestigationBoard from "../components/InvestigationBoard.tsx";
 import { Node} from '../types/index.ts';
 
 interface Case {
