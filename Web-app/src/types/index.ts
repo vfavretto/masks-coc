@@ -8,9 +8,20 @@ export interface Clue {
   tags?: string[];
 }
 
-export interface Connection {
+export interface Node {
   id: number;
+  type: 'evidence' | 'person' | 'location';
+  title: string;
+  content: string;
+  date?: string;
+  importance: 'low' | 'medium' | 'high';
+  status: 'unverified' | 'verified' | 'disproven';
+  x: number;
+  y: number;
+}
+
+export interface Connection {
   from: number;
   to: number;
-  notes?: string;
+  label: string;
 }

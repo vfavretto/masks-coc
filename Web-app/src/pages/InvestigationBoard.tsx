@@ -1,343 +1,149 @@
-import { useState, useRef } from "react";
-import {
-  Image,
-  StickyNote,
-  MapPin,
-  PlusCircle,
-  Link as LinkIcon,
-  X,
-  Edit2,
-} from "lucide-react";
-import { Clue, Connection } from "../types";
-import paperTexture from "../../assets/img/paper-texture.jpg"
+import { useState, useRef, MouseEvent } from 'react';
+import { Pin, FileText, User, MapPin, Link as LinkIcon, Plus } from 'lucide-react';
+import { Node, Connection } from '../types/index';
 
-const InvestigationBoard = () => {
-  const [clues, setClues] = useState<Clue[]>([
-    {
-      id: 1,
-      title: "Strange Symbols at Miskatonic",
-      content:
-        "Ancient runes discovered in basement. Professor Webb concerned.",
-      position: { x: 120, y: 150 },
-      type: "evidence",
-      date: "1925-01-15",
-      tags: ["occult", "university"],
-    },
-    {
-      id: 2,
-      title: "Missing Students",
-      content: "Three students vanished after visiting library archives.",
-      position: { x: 400, y: 300 },
-      type: "suspect",
-      date: "1925-01-20",
-      tags: ["disappearance"],
-    },
+
+interface InvestigationBoardProps {
+  nodes: Node[];
+  setNodes: React.Dispatch<React.SetStateAction<Node[]>>;
+}
+
+const InvestigationBoard: React.FC<InvestigationBoardProps> = ({ nodes, setNodes }) => {
+
+  const [connections] = useState<Connection[]>([
+    { from: 1, to: 2, label: 'Crime Scene' },
+    { from: 2, to: 3, label: 'Interviewed Here' }
   ]);
 
-  const [connections, setConnections] = useState<Connection[]>([]);
-  const [draggingClue, setDraggingClue] = useState<number | null>(null);
-  const [connectingFrom, setConnectingFrom] = useState<number | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [draggedNode, setDraggedNode] = useState<number | null>(null);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const boardRef = useRef<HTMLDivElement>(null);
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [editingClue, setEditingClue] = useState<Clue | null>(null);
-  const [caseTitle, setCaseTitle] = useState("Miskatonic Mysteries");
-  const [editingTitle, setEditingTitle] = useState(false);
 
-  const typeIcons = {
-    location: <MapPin className="w-5 h-5" />,
-    evidence: <Image className="w-5 h-5" />,
-    testimony: <StickyNote className="w-5 h-5" />,
-    suspect: <Image className="w-5 h-5" />,
+  const handleMouseDown = (e: MouseEvent<HTMLDivElement>, nodeId: number) => {
+    const node = nodes.find(n => n.id === nodeId);
+    if (!node) return;
+    
+    const rect = e.currentTarget.getBoundingClientRect();
+    setIsDragging(true);
+    setDraggedNode(nodeId);
+    setDragOffset({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    });
   };
 
-  const getTypeColor = (type: string) => {
-    const colors = {
-      location: "bg-blue-100 border-blue-300",
-      evidence: "bg-red-100 border-red-300",
-      testimony: "bg-yellow-100 border-yellow-300",
-      suspect: "bg-purple-100 border-purple-300",
-    };
-    return colors[type as keyof typeof colors] || colors.evidence;
+  const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
+    if (!isDragging || !draggedNode || !boardRef.current) return;
+
+    const boardRect = boardRef.current.getBoundingClientRect();
+    const newX = e.clientX - boardRect.left - dragOffset.x;
+    const newY = e.clientY - boardRect.top - dragOffset.y;
+
+    setNodes(nodes.map(node => 
+      node.id === draggedNode 
+        ? { ...node, x: Math.max(0, Math.min(newX, boardRect.width - 200)), y: Math.max(0, Math.min(newY, boardRect.height - 100)) }
+        : node
+    ));
   };
 
-  const handleDragStart = (id: number, e: React.DragEvent) => {
-    setDraggingClue(id);
-    e.dataTransfer.setData("text/plain", id.toString());
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    setDraggedNode(null);
   };
 
-  const handleDrop = (e: React.DragEvent) => {
-    if (!boardRef.current || !draggingClue) return;
-
-    const rect = boardRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left - 100;
-    const y = e.clientY - rect.top - 50;
-
-    setClues(
-      clues.map((clue) =>
-        clue.id === draggingClue ? { ...clue, position: { x, y } } : clue
-      )
-    );
-    setDraggingClue(null);
-  };
-
-  const handleConnection = (clueId: number) => {
-    if (connectingFrom === null) {
-      setConnectingFrom(clueId);
-    } else if (connectingFrom !== clueId) {
-      setConnections([
-        ...connections,
-        { id: connections.length + 1, from: connectingFrom, to: clueId },
-      ]);
-      setConnectingFrom(null);
+  const getNodeIcon = (type: Node['type']) => {
+    switch (type) {
+      case 'evidence': return <FileText className="w-4 h-4" />;
+      case 'person': return <User className="w-4 h-4" />;
+      case 'location': return <MapPin className="w-4 h-4" />;
+      default: return <Pin className="w-4 h-4" />;
     }
   };
 
-  const addNewClue = () => {
-    const newClue: Clue = {
-      id: clues.length + 1,
-      title: "New Lead",
-      content: "Add details...",
-      position: { x: 300, y: 200 },
-      type: "evidence",
-      date: new Date().toISOString().split("T")[0],
-    };
-    setClues([...clues, newClue]);
-    setEditingClue(newClue);
-    setIsEditMode(true);
+  const getNodeColor = (type: Node['type']) => {
+    switch (type) {
+      case 'evidence': return 'border-red-500';
+      case 'person': return 'border-blue-500';
+      case 'location': return 'border-green-500';
+      default: return 'border-gray-500';
+    }
   };
 
   return (
-    <div className="relative min-h-screen bg-[#2c2527] text-gray-200">
-      <div
-        className="absolute inset-0 bg-[#f4d03f] opacity-10 pointer-events-none"
-        style={{
-          backgroundImage: `url(${paperTexture})`,
-          backgroundBlendMode: "multiply",
-          filter: "sepia(50%) contrast(90%)",
-          mixBlendMode: "overlay",
-        }}
-      />
-
-      <header className="p-6 bg-black/40 border-b border-primary/20 backdrop-blur-sm">
-        <h1 className="text-4xl font-bold text-primary font-[MedievalSharp] mb-2">
-          Investigation Board
-        </h1>
-        <div className="flex justify-between items-center">
-          {editingTitle ? (
-            <input
-              value={caseTitle}
-              onChange={(e) => setCaseTitle(e.target.value)}
-              onBlur={() => setEditingTitle(false)}
-              onKeyDown={(e) => e.key === "Enter" && setEditingTitle(false)}
-              className="bg-transparent border-b text-gray-400 font-serif italic focus:outline-none"
-              autoFocus
-            />
-          ) : (
-            <p
-              onClick={() => setEditingTitle(true)}
-              className="text-gray-400 font-serif italic cursor-pointer hover:text-gray-300"
-            >
-              Case File: {caseTitle}
-            </p>
-          )}
-          <button
-            onClick={addNewClue}
-            className="px-4 py-2 bg-primary/20 text-primary rounded hover:bg-primary/30 transition-all"
-          >
-            <PlusCircle className="w-5 h-5 inline mr-2" />
-            Add Clue
-          </button>
-        </div>
-      </header>
-
-      <div
+    <div className="w-full h-[800px] relative overflow-hidden bg-neutral-900 border border-primary/20 rounded-lg">
+      <div className="absolute inset-0 bg-[url('/texture.png')] opacity-5" />
+      
+      <div 
         ref={boardRef}
-        className="relative h-[calc(100vh-96px)] overflow-auto p-8"
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={handleDrop}
+        className="relative w-full h-full cursor-move"
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
       >
-        {/* Connection lines */}
         <svg className="absolute inset-0 pointer-events-none">
-          {connections.map((conn) => {
-            const fromClue = clues.find((c) => c.id === conn.from);
-            const toClue = clues.find((c) => c.id === conn.to);
-            if (!fromClue || !toClue) return null;
+          {connections.map(({ from, to, label }) => {
+            const fromNode = nodes.find(n => n.id === from);
+            const toNode = nodes.find(n => n.id === to);
+            if (!fromNode || !toNode) return null;
+
+            const x1 = fromNode.x + 100;
+            const y1 = fromNode.y + 50;
+            const x2 = toNode.x + 100;
+            const y2 = toNode.y + 50;
 
             return (
-              <g key={conn.id}>
+              <g key={`${from}-${to}`}>
                 <line
-                  x1={fromClue.position.x + 100}
-                  y1={fromClue.position.y + 50}
-                  x2={toClue.position.x + 100}
-                  y2={toClue.position.y + 50}
-                  stroke="#ff6b6b"
+                  x1={x1}
+                  y1={y1}
+                  x2={x2}
+                  y2={y2}
+                  stroke="#ef4444"
                   strokeWidth="2"
                   strokeDasharray="4"
                 />
+                <text
+                  x={(x1 + x2) / 2}
+                  y={(y1 + y2) / 2}
+                  fill="#ef4444"
+                  className="text-xs"
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                >
+                  {label}
+                </text>
               </g>
             );
           })}
         </svg>
 
-        {/* Clues */}
-        {clues.map((clue) => (
+        {nodes.map((node) => (
           <div
-            key={clue.id}
-            className={`absolute w-[200px] p-4 rounded shadow-lg cursor-move
-              ${getTypeColor(
-                clue.type
-              )} transform hover:-translate-y-1 transition-all duration-200`}
-            style={{
-              left: clue.position.x,
-              top: clue.position.y,
-              rotate: `${Math.random() * 3 - 1.5}deg`,
-            }}
-            draggable
-            onDragStart={(e) => handleDragStart(clue.id, e)}
+            key={node.id}
+            className={`absolute w-48 p-4 rounded-lg border-2 bg-black/80 backdrop-blur-sm cursor-move
+              ${getNodeColor(node.type)} hover:shadow-lg hover:shadow-primary/20 transition-shadow duration-300`}
+            style={{ left: node.x, top: node.y }}
+            onMouseDown={(e) => handleMouseDown(e, node.id)}
           >
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                {typeIcons[clue.type]}
-                <h3 className="text-lg font-bold text-gray-800">
-                  {clue.title}
-                </h3>
-              </div>
-              <div className="flex gap-1">
-                <button
-                  onClick={() => handleConnection(clue.id)}
-                  className="p-1 hover:bg-gray-200 rounded"
-                >
-                  <LinkIcon className="w-4 h-4 text-gray-600" />
-                </button>
-                <button
-                  onClick={() => {
-                    setEditingClue(clue);
-                    setIsEditMode(true);
-                  }}
-                  className="p-1 hover:bg-gray-200 rounded"
-                >
-                  <Edit2 className="w-4 h-4 text-gray-600" />
-                </button>
-              </div>
+            <div className="flex items-center gap-2 mb-2">
+              {getNodeIcon(node.type)}
+              <h3 className="text-sm font-bold text-primary font-[MedievalSharp]">
+                {node.title}
+              </h3>
             </div>
-            <p className="text-sm text-gray-600 mb-2">{clue.content}</p>
-            {clue.date && (
-              <div className="text-xs text-gray-500 italic">
-                {new Date(clue.date).toLocaleDateString()}
-              </div>
-            )}
-            {clue.tags && (
-              <div className="flex flex-wrap gap-1 mt-2">
-                {clue.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="px-2 py-1 bg-gray-200 rounded-full text-xs text-gray-600"
-                  >
-                    #{tag}
-                  </span>
-                ))}
-              </div>
-            )}
+            <p className="text-xs text-gray-400 font-serif">{node.content}</p>
           </div>
         ))}
+      </div>
 
-        {/* Edit Modal */}
-        {isEditMode && editingClue && (
-          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold text-gray-800">Edit Clue</h2>
-                <button
-                  onClick={() => {
-                    setIsEditMode(false);
-                    setEditingClue(null);
-                  }}
-                >
-                  <X className="w-6 h-6 text-gray-600" />
-                </button>
-              </div>
-              <form className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Title
-                  </label>
-                  <input
-                    type="text"
-                    value={editingClue.title}
-                    onChange={(e) =>
-                      setEditingClue({ ...editingClue, title: e.target.value })
-                    }
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Content
-                  </label>
-                  <textarea
-                    value={editingClue.content}
-                    onChange={(e) =>
-                      setEditingClue({
-                        ...editingClue,
-                        content: e.target.value,
-                      })
-                    }
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2"
-                    rows={3}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Type
-                  </label>
-                  <select
-                    value={editingClue.type}
-                    onChange={(e) =>
-                      setEditingClue({
-                        ...editingClue,
-                        type: e.target.value as any,
-                      })
-                    }
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2"
-                  >
-                    <option value="location">Location</option>
-                    <option value="evidence">Evidence</option>
-                    <option value="testimony">Testimony</option>
-                    <option value="suspect">Suspect</option>
-                  </select>
-                </div>
-                <div className="flex justify-end gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setClues(clues.filter((c) => c.id !== editingClue.id));
-                      setIsEditMode(false);
-                      setEditingClue(null);
-                    }}
-                    className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-                  >
-                    Delete
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setClues(
-                        clues.map((c) =>
-                          c.id === editingClue.id ? editingClue : c
-                        )
-                      );
-                      setIsEditMode(false);
-                      setEditingClue(null);
-                    }}
-                    className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/80"
-                  >
-                    Save
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
+      <div className="absolute bottom-4 right-4 flex gap-2">
+        <button className="p-2 rounded-full bg-primary/20 hover:bg-primary/30 transition-colors">
+          <Plus className="w-4 h-4 text-primary" />
+        </button>
+        <button className="p-2 rounded-full bg-primary/20 hover:bg-primary/30 transition-colors">
+          <LinkIcon className="w-4 h-4 text-primary" />
+        </button>
       </div>
     </div>
   );
