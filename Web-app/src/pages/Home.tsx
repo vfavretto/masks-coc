@@ -15,6 +15,7 @@ import leoImg from "../../assets/img/leo.jpeg";
 import gabaoImg from "../../assets/img/gabao.jpeg";
 import caliImg from "../../assets/img/caliel.jpg";
 import galleryImg1 from "../../assets/img/TelegrafoPeru.jpeg";
+import galleryImg2 from "../../assets/img/TelegrafoJackson.jpeg";
 
 const Home = () => {
   useEffect(() => {
@@ -51,7 +52,7 @@ const Home = () => {
           {
             icon: <Skull className="w-12 h-12 text-primary mb-4" />,
             title: "About the Campaign",
-            desc: "Set in 1920s New England, our investigators uncover eldritch horrors and ancient mysteries that threaten the very fabric of reality.",
+            desc: "Set in 1920s, our investigators uncover eldritch horrors and ancient mysteries that threaten the very fabric of reality.",
           },
           {
             icon: <Users className="w-12 h-12 text-primary mb-4" />,
@@ -158,7 +159,7 @@ const Home = () => {
           </h2>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {[galleryImg1].map((img, i) => (
+          {[galleryImg1, galleryImg2].map((img, i) => (
             <div
               key={i}
               className="aspect-square bg-black/50 rounded-lg border border-primary/20 overflow-hidden hover:border-primary/40 transition-all duration-300 cursor-pointer"
@@ -192,12 +193,13 @@ const Home = () => {
         <div className="space-y-4">
           {[
             {
-              title: "Next Session: Session 0",
-              date: "Saturday, Jan 18rd - 7:00 PM",
+              title: "A carta de Jackson Elias",
+              desc: "Após 4 anos dos primeiros eventos, todos investigadores receberam um telegrafo misterioso de Jackson Elias.",
             },
             {
-              title: "Campaign Milestone Reached",
-              desc: "Our investigators have made all characters sheets.",
+              title: "Primeira mesa finalizada!",
+              desc: "Depois de quase 9 horas de muito combate e investigação, a primeira mesa foi concluida com sucesso.",
+              date: "Saturday, Jan 18th - 1:00 PM",
             },
           ].map((update, i) => (
             <div
@@ -226,19 +228,19 @@ const Home = () => {
           {[
             {
               title: "Ancient Tomes",
-              items: ["Necronomicon", "Book of Eibon", "Pnakotic Manuscripts"],
+              items: [],
             },
             {
               title: "Mysterious Locations",
-              items: ["Miskatonic University", "Arkham", "Innsmouth"],
+              items: ["Montanhas de Puno"],
             },
             {
               title: "Encountered Entities",
-              items: ["Deep Ones", "Ghouls", "Dark Young"],
+              items: ["Nyarlathotep", "A Fome"],
             },
             {
               title: "Arcane Artifacts",
-              items: ["Elder Sign", "Silver Key", "Shining Trapezohedron"],
+              items: [],
             },
           ].map((category, i) => (
             <div
