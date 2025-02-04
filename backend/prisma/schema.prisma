@@ -3,102 +3,42 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
 }
 
 model Character {
-  id            Int      @id @default(autoincrement())
-  name          String
-  occupation    String
-  image         String
-  background    String
-  wounds        Int
-  maxHealth     Int
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id              Int      @id @default(autoincrement())
+  name            String
+  occupation      String
+  image           String
+  background      String
+  stats           Json     // Ex: { str: 70, dex: 60 }
+  skills          Json     // Ex: [{ name: "Arqueologia", value: 70 }]
+  equipment       Json     // Ex: [{ name: "Revólver .38", type: "WEAPON" }]
+  mentalHealth    Json     // Ex: { sanity: 65, phobias: ["Nyctophobia"] }
+  pulpTalents     String[] // Ex: ["Sexto Sentido"]
+  wounds          Int
+  maxHealth       Int
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  stats         Stats?   @relation(fields: [statsId], references: [id])
-  statsId       Int?     @unique
-  mentalHealth  MentalHealth? @relation(fields: [mentalHealthId], references: [id])
-  mentalHealthId Int?    @unique
-  skills        Skill[]
-  equipment     Equipment[]
-  pulpTalents   String[]
+  @@map("characters")
 }
 
-model Stats {
-  id        Int       @id @default(autoincrement())
-  For       Int
-  Con       Int
-  Tam       Int
-  Des       Int
-  Apa       Int
-  Edu       Int
-  Int       Int
-  Pod       Int
-  character Character?
-}
-
-model MentalHealth {
-  id                 Int       @id @default(autoincrement())
-  sanity            Int
-  maxSanity         Int
-  temporaryInsanity Boolean
-  indefiniteInsanity Boolean
-  phobias           String[]
-  manias            String[]
-  character         Character?
-}
-
-model Skill {
-  id        Int       @id @default(autoincrement())
-  name      String
-  value     Int
-  category  String
-  character Character @relation(fields: [charId], references: [id])
-  charId    Int
-}
-
-model Equipment {
+model SessionNote {
   id          Int       @id @default(autoincrement())
-  name        String
-  type        String
-  description String
-  character   Character @relation(fields: [charId], references: [id])
-  charId      Int
-}
+  title       String
+  date        DateTime
+  location    String
+  summary     String
+  details     String
+  tags        String[]  // Ex: ["combat", "investigation"]
+  images      String[]
+  clues       Json      // Ex: [{ name: "Newspaper Clipping", type: "DOCUMENT" }]
+  items       Json      // Ex: [{ name: "Brass Key", type: "KEY" }]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-model Session {
-  id        Int      @id @default(autoincrement())
-  title     String
-  date      DateTime
-  location  String
-  summary   String
-  details   String
-  tags      String[]
-  images    String[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  clues     Clue[]
-  items     Item[]
-}
-
-model Clue {
-  id          Int     @id @default(autoincrement())
-  name        String
-  description String
-  type        String
-  session     Session @relation(fields: [sessionId], references: [id])
-  sessionId   Int
-}
-
-model Item {
-  id          Int     @id @default(autoincrement())
-  name        String
-  description String
-  type        String
-  session     Session @relation(fields: [sessionId], references: [id])
-  sessionId   Int
+  @@map("session_notes")
 }

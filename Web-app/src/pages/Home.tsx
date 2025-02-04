@@ -201,9 +201,9 @@ const Home = () => {
               desc: "Depois de quase 9 horas de muito combate e investigação, a primeira mesa foi concluida com sucesso.",
               date: "Saturday, Jan 18th - 1:00 PM",
             },
-          ].map((update, i) => (
+          ].map((update, index) => (
             <div
-              key={i}
+              key={index}
               className="border-l-4 border-primary pl-4 hover:border-primary/80 transition-colors duration-300"
             >
               <h3 className="text-xl font-bold font-[MedievalSharp]">

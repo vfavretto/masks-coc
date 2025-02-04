@@ -1,11 +1,13 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "ES2020",
     "module": "commonjs",
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true
-  }
+  },
+  "include": ["src/**/*"], // Inclui todos os arquivos .ts na pasta src
+  "exclude": ["node_modules", "dist"] // Exclui node_modules e a pasta de build
 }
