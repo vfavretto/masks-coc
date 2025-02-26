@@ -3,15 +3,23 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const connectDB = async (): Promise<void> => {
-    try{
-        const conn = await mongoose.connect(process.env.MONGO_URI as string);
-        console.log(`MongoDB Connected: ${conn.connection.host}`);
-    } catch (error) {
-        console.error('Error connecting to MongoDB:', error);
-        process.exit(1);
-    }
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/rpg-campaign';
+
+export const connectDatabase = async (): Promise<void> => {
+  try {
+    await mongoose.connect(MONGODB_URI);
+    console.log('Connected to MongoDB');
+  } catch (error) {
+    console.error('MongoDB connection error:', error);
+    process.exit(1);
+  }
 };
 
-export default connectDB;
-
+export const disconnectDatabase = async (): Promise<void> => {
+  try {
+    await mongoose.disconnect();
+    console.log('Disconnected from MongoDB');
+  } catch (error) {
+    console.error('MongoDB disconnection error:', error);
+  }
+};
