@@ -1,4 +1,4 @@
-import express, { Express } from 'express';
+import express, { Express, ErrorRequestHandler } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import { characterRoutes } from './routes/characterRoutes';
@@ -15,8 +15,7 @@ export const createApp = (): Express => {
   app.use('/api/characters', characterRoutes);
   app.use('/api/sessions', sessionRoutes);
 
-
-  app.use(errorHandler);
+  app.use(errorHandler as ErrorRequestHandler);
 
   return app;
 };

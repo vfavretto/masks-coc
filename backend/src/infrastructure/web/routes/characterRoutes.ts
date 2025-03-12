@@ -26,10 +26,24 @@ const characterController = new CharacterController(
   deleteCharacterUseCase
 );
 
-router.get('/', (req, res) => characterController.getAllCharacters(req, res));
-router.get('/:id', (req, res) => characterController.getCharacterById(req, res));
-router.post('/', (req, res) => characterController.createCharacter(req, res));
-router.put('/:id', (req, res) => characterController.updateCharacter(req, res));
-router.delete('/:id', (req, res) => characterController.deleteCharacter(req, res));
+router.get('/', async (req, res) => {
+  await characterController.getAllCharacters(req, res);
+});
+
+router.get('/:id', async (req, res) => {
+  await characterController.getCharacterById(req, res);
+});
+
+router.post('/', async (req, res) => {
+  await characterController.createCharacter(req, res);
+});
+
+router.put('/:id', async (req, res) => {
+  await characterController.updateCharacter(req, res);
+});
+
+router.delete('/:id', async (req, res) => {
+  await characterController.deleteCharacter(req, res);
+});
 
 export { router as characterRoutes };

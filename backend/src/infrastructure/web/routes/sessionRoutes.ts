@@ -32,12 +32,32 @@ const sessionController = new SessionController(
   deleteSessionUseCase
 );
 
-router.get('/', (req, res) => sessionController.getAllSessions(req, res));
-router.get('/search', (req, res) => sessionController.searchSessions(req, res));
-router.get('/tags', (req, res) => sessionController.getSessionsByTags(req, res));
-router.get('/:id', (req, res) => sessionController.getSessionById(req, res));
-router.post('/', (req, res) => sessionController.createSession(req, res));
-router.put('/:id', (req, res) => sessionController.updateSession(req, res));
-router.delete('/:id', (req, res) => sessionController.deleteCharacter(req, res));
+router.get('/', async (req, res) => {
+  await sessionController.getAllSessions(req, res);
+});
+
+router.get('/search', async (req, res) => {
+  await sessionController.searchSessions(req, res);
+});
+
+router.get('/tags', async (req, res) => {
+  await sessionController.getSessionsByTags(req, res);
+});
+
+router.get('/:id', async (req, res) => {
+  await sessionController.getSessionById(req, res);
+});
+
+router.post('/', async (req, res) => {
+  await sessionController.createSession(req, res);
+});
+
+router.put('/:id', async (req, res) => {
+  await sessionController.updateSession(req, res);
+});
+
+router.delete('/:id', async (req, res) => {
+  await sessionController.deleteSession(req, res);
+});
 
 export { router as sessionRoutes };

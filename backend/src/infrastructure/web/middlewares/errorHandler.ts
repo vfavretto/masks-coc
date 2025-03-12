@@ -1,7 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
 import { ApplicationError } from '../../../shared/errors/ApplicationError';
 
-export const errorHandler = (
+// Definir um tipo personalizado que aceita o retorno de Response
+type CustomErrorHandler = (
+  err: Error,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => Response | void;
+
+export const errorHandler: CustomErrorHandler = (
   err: Error,
   req: Request,
   res: Response,
