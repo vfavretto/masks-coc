@@ -12,6 +12,11 @@ export const createApp = (): Express => {
   app.use(cors());
   app.use(helmet());
 
+  // Rota raiz para teste de deploy
+  app.get('/', (req, res) => {
+    res.status(200).json({ message: 'Masks CoC API is running!' });
+  });
+
   app.use('/api/characters', characterRoutes);
   app.use('/api/sessions', sessionRoutes);
 
