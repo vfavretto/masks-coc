@@ -14,7 +14,7 @@ export const createApp = (): Express => {
 
   // Rota raiz para teste de deploy
   app.get('/', (req, res) => {
-    res.status(200).json({ message: 'Masks CoC API is running!' });
+    res.status(200).json({ message: 'Masks CoC API is finally running!' });
   });
 
   app.use('/api/characters', characterRoutes);
