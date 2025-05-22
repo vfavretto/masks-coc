@@ -52,18 +52,40 @@ const Characters = () => {
     try {
       setLoading(true);
       setError(null);
+      console.log('🔄 Fetching characters...');
+      
       const response = await characterAPI.getAll();
       
       console.log('📦 Characters API Response:', response);
       console.log('📋 Characters Data:', response.data);
+      console.log('🔍 Response data type:', typeof response.data);
+      console.log('🔍 Is array?', Array.isArray(response.data));
       
       // Validar se response.data é um array
       const charactersData = Array.isArray(response.data) ? response.data : [];
       console.log('✅ Characters Array:', charactersData);
+      console.log('📊 Characters count:', charactersData.length);
       
       setCharacters(charactersData);
+      
+      if (charactersData.length === 0) {
+        console.log('⚠️ No characters found in response');
+      } else {
+        console.log('🎭 Characters loaded successfully:', charactersData.map(c => c.name));
+      }
     } catch (error) {
-      console.error('Error fetching characters:', error);
+      console.error('💥 Error fetching characters:', error);
+      
+      // Log mais detalhado do erro
+      if (error instanceof Error) {
+        console.error('Error message:', error.message);
+      }
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as any;
+        console.error('Response status:', axiosError.response?.status);
+        console.error('Response data:', axiosError.response?.data);
+      }
+      
       setError('Falha ao carregar investigadores');
       setCharacters([]); // Garantir que seja um array vazio em caso de erro
     } finally {
@@ -282,13 +304,24 @@ const Characters = () => {
     <div className="space-y-8">
       {error && (
         <div className="bg-red-900/50 border border-red-500 text-red-100 p-4 rounded-lg">
-          {error}
-          <button 
-            onClick={() => setError(null)}
-            className="ml-2 text-red-200 hover:text-white"
-          >
-            ×
-          </button>
+          <div className="flex justify-between items-center">
+            <span>{error}</span>
+            <div className="flex gap-2">
+              <button 
+                onClick={fetchCharacters}
+                className="px-3 py-1 bg-red-700 hover:bg-red-600 rounded text-sm transition-colors"
+                disabled={loading}
+              >
+                Tentar Novamente
+              </button>
+              <button 
+                onClick={() => setError(null)}
+                className="text-red-200 hover:text-white"
+              >
+                ×
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -311,6 +344,14 @@ const Characters = () => {
             />
           </div>
           <button 
+            className="flex items-center gap-2 px-3 py-2 bg-gray-800 hover:bg-gray-700 transition-colors duration-300 rounded-lg border border-gray-600"
+            onClick={fetchCharacters}
+            disabled={loading}
+            title="Recarregar investigadores"
+          >
+            <div className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`}>🔄</div>
+          </button>
+          <button 
             className="flex items-center gap-2 px-4 py-2 bg-primary/20 hover:bg-primary/30 transition-colors duration-300 rounded-lg border border-primary/20"
             onClick={handleCreateNew}
             disabled={loading}
@@ -323,10 +364,38 @@ const Characters = () => {
 
       {/* Characters Grid */}
       {filteredCharacters.length === 0 ? (
-        <div className="flex justify-center items-center h-64">
-          <p className="text-gray-400">
-            {characters.length === 0 ? 'Nenhum investigador encontrado. Crie o seu primeiro!' : 'Nenhum investigador corresponde à sua busca.'}
-          </p>
+        <div className="flex flex-col justify-center items-center h-64 space-y-4">
+          {loading ? (
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+              <p className="text-gray-400">Carregando investigadores...</p>
+            </div>
+          ) : characters.length === 0 ? (
+            <div className="text-center space-y-3">
+              <Skull className="w-16 h-16 text-gray-600 mx-auto" />
+              <p className="text-gray-400">Nenhum investigador encontrado.</p>
+              <p className="text-gray-500 text-sm">Crie o seu primeiro investigador!</p>
+              <button 
+                className="mt-2 px-4 py-2 bg-primary/20 hover:bg-primary/30 transition-colors duration-300 rounded-lg border border-primary/20"
+                onClick={handleCreateNew}
+                disabled={loading}
+              >
+                Criar Primeiro Investigador
+              </button>
+            </div>
+          ) : (
+            <div className="text-center space-y-3">
+              <Search className="w-16 h-16 text-gray-600 mx-auto" />
+              <p className="text-gray-400">Nenhum investigador corresponde à sua busca.</p>
+              <p className="text-gray-500 text-sm">Termo: "{searchTerm}"</p>
+              <button 
+                className="mt-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 transition-colors duration-300 rounded-lg"
+                onClick={() => setSearchTerm('')}
+              >
+                Limpar Busca
+              </button>
+            </div>
+          )}
         </div>
       ) : (
         <div className="grid md:grid-cols-2 gap-8">
