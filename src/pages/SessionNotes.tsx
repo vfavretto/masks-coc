@@ -88,6 +88,10 @@ const SessionNotes = () => {
       case 'key': return '🗝️';
       case 'book': return '📚';
       case 'weapon': return '🗡️';
+      case 'tool': return '🔧';
+      case 'artifact': return '🏺';
+      case 'witness': return '👁️';
+      case 'location': return '📍';
       default: return '📦';
     }
   };
@@ -157,11 +161,14 @@ const SessionNotes = () => {
       try {
         setLoading(true);
         setError(null);
-        await sessionAPI.delete(id);
+        console.log('🗑️ Deleting session with ID:', id);
+        const response = await sessionAPI.delete(id);
+        console.log('✅ Delete response:', response);
         await fetchSessions(); // Refresh the list
+        console.log('🔄 Sessions refreshed after delete');
       } catch (error) {
-        console.error('Error deleting session:', error);
-        setError('Failed to delete session');
+        console.error('❌ Error deleting session:', error);
+        setError('Failed to delete session: ' + (error as any).message);
       } finally {
         setLoading(false);
       }
@@ -543,6 +550,176 @@ const SessionNotes = () => {
                     className="w-full bg-black/30 border border-primary/20 rounded p-3 text-white"
                     placeholder="https://..."
                   />
+                </div>
+
+                {/* Clues Section */}
+                <div>
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-xl font-[MedievalSharp] text-primary">Discovered Clues</h3>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFormData(prev => ({
+                          ...prev,
+                          clues: [...prev.clues, { id: crypto.randomUUID(), name: '', description: '', type: 'evidence' }]
+                        }));
+                      }}
+                      className="px-3 py-1 bg-primary/20 hover:bg-primary/30 rounded-lg border border-primary/20 flex items-center gap-2"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Add Clue
+                    </button>
+                  </div>
+                  
+                  {formData.clues.map((clue, index) => (
+                    <div key={clue.id || index} className="grid grid-cols-12 gap-2 mb-2 items-center">
+                      <div className="col-span-4">
+                        <input
+                          type="text"
+                          value={clue.name}
+                          onChange={(e) => {
+                            const newClues = [...formData.clues];
+                            newClues[index] = { ...newClues[index], name: e.target.value };
+                            setFormData(prev => ({ ...prev, clues: newClues }));
+                          }}
+                          placeholder="Clue name"
+                          className="w-full bg-black/30 border border-primary/20 rounded p-2 text-white"
+                          required
+                        />
+                      </div>
+                      <div className="col-span-5">
+                        <input
+                          type="text"
+                          value={clue.description}
+                          onChange={(e) => {
+                            const newClues = [...formData.clues];
+                            newClues[index] = { ...newClues[index], description: e.target.value };
+                            setFormData(prev => ({ ...prev, clues: newClues }));
+                          }}
+                          placeholder="Description"
+                          className="w-full bg-black/30 border border-primary/20 rounded p-2 text-white"
+                          required
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <select
+                          value={clue.type}
+                          onChange={(e) => {
+                            const newClues = [...formData.clues];
+                            newClues[index] = { ...newClues[index], type: e.target.value };
+                            setFormData(prev => ({ ...prev, clues: newClues }));
+                          }}
+                          className="w-full bg-black/30 border border-primary/20 rounded p-2 text-white"
+                          required
+                        >
+                          <option value="evidence">Evidence</option>
+                          <option value="document">Document</option>
+                          <option value="witness">Witness</option>
+                          <option value="location">Location</option>
+                        </select>
+                      </div>
+                      <div className="col-span-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFormData(prev => ({
+                              ...prev,
+                              clues: prev.clues.filter((_, i) => i !== index)
+                            }));
+                          }}
+                          className="p-2 text-gray-400 hover:text-red-500 transition-colors duration-300"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Items Section */}
+                <div>
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-xl font-[MedievalSharp] text-primary">Collected Items</h3>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFormData(prev => ({
+                          ...prev,
+                          items: [...prev.items, { id: crypto.randomUUID(), name: '', description: '', type: 'tool' }]
+                        }));
+                      }}
+                      className="px-3 py-1 bg-primary/20 hover:bg-primary/30 rounded-lg border border-primary/20 flex items-center gap-2"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Add Item
+                    </button>
+                  </div>
+                  
+                  {formData.items.map((item, index) => (
+                    <div key={item.id || index} className="grid grid-cols-12 gap-2 mb-2 items-center">
+                      <div className="col-span-4">
+                        <input
+                          type="text"
+                          value={item.name}
+                          onChange={(e) => {
+                            const newItems = [...formData.items];
+                            newItems[index] = { ...newItems[index], name: e.target.value };
+                            setFormData(prev => ({ ...prev, items: newItems }));
+                          }}
+                          placeholder="Item name"
+                          className="w-full bg-black/30 border border-primary/20 rounded p-2 text-white"
+                          required
+                        />
+                      </div>
+                      <div className="col-span-5">
+                        <input
+                          type="text"
+                          value={item.description}
+                          onChange={(e) => {
+                            const newItems = [...formData.items];
+                            newItems[index] = { ...newItems[index], description: e.target.value };
+                            setFormData(prev => ({ ...prev, items: newItems }));
+                          }}
+                          placeholder="Description"
+                          className="w-full bg-black/30 border border-primary/20 rounded p-2 text-white"
+                          required
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <select
+                          value={item.type}
+                          onChange={(e) => {
+                            const newItems = [...formData.items];
+                            newItems[index] = { ...newItems[index], type: e.target.value };
+                            setFormData(prev => ({ ...prev, items: newItems }));
+                          }}
+                          className="w-full bg-black/30 border border-primary/20 rounded p-2 text-white"
+                          required
+                        >
+                          <option value="tool">Tool</option>
+                          <option value="key">Key</option>
+                          <option value="weapon">Weapon</option>
+                          <option value="book">Book</option>
+                          <option value="artifact">Artifact</option>
+                          <option value="document">Document</option>
+                        </select>
+                      </div>
+                      <div className="col-span-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFormData(prev => ({
+                              ...prev,
+                              items: prev.items.filter((_, i) => i !== index)
+                            }));
+                          }}
+                          className="p-2 text-gray-400 hover:text-red-500 transition-colors duration-300"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
                 
                 <div className="flex justify-end gap-4 mt-8">
