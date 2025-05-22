@@ -53,10 +53,19 @@ const Characters = () => {
       setLoading(true);
       setError(null);
       const response = await characterAPI.getAll();
-      setCharacters(response.data);
+      
+      console.log('📦 Characters API Response:', response);
+      console.log('📋 Characters Data:', response.data);
+      
+      // Validar se response.data é um array
+      const charactersData = Array.isArray(response.data) ? response.data : [];
+      console.log('✅ Characters Array:', charactersData);
+      
+      setCharacters(charactersData);
     } catch (error) {
       console.error('Error fetching characters:', error);
       setError('Falha ao carregar investigadores');
+      setCharacters([]); // Garantir que seja um array vazio em caso de erro
     } finally {
       setLoading(false);
     }
@@ -66,11 +75,11 @@ const Characters = () => {
     fetchCharacters();
   }, []);
 
-  // Filter characters
-  const filteredCharacters = characters.filter((character) =>
+  // Filter characters - garantir que characters é sempre um array
+  const filteredCharacters = Array.isArray(characters) ? characters.filter((character) =>
     character.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     character.occupation.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ) : [];
 
   // Helper functions for icons
   const getSkillIcon = (category: string) => {

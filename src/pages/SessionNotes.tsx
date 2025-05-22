@@ -46,10 +46,19 @@ const SessionNotes = () => {
       setLoading(true);
       setError(null);
       const response = await sessionAPI.getAll();
-      setSessions(response.data);
+      
+      console.log('📦 Sessions API Response:', response);
+      console.log('📋 Sessions Data:', response.data);
+      
+      // Validar se response.data é um array
+      const sessionsData = Array.isArray(response.data) ? response.data : [];
+      console.log('✅ Sessions Array:', sessionsData);
+      
+      setSessions(sessionsData);
     } catch (error) {
       console.error('Error fetching sessions:', error);
       setError('Failed to load sessions');
+      setSessions([]); // Garantir que seja um array vazio em caso de erro
     } finally {
       setLoading(false);
     }
@@ -59,17 +68,17 @@ const SessionNotes = () => {
     fetchSessions();
   }, []);
 
-  // Filter sessions
-  const filteredSessions = sessions.filter((session) => {
+  // Filter sessions - garantir que sessions é sempre um array
+  const filteredSessions = Array.isArray(sessions) ? sessions.filter((session) => {
     const matchesSearch = session.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       session.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
       session.summary.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesTag = selectedTag ? session.tags.includes(selectedTag) : true;
     return matchesSearch && matchesTag;
-  });
+  }) : [];
 
-  // Get all unique tags
-  const allTags = Array.from(new Set(sessions.flatMap((session) => session.tags)));
+  // Get all unique tags - garantir que sessions é um array
+  const allTags = Array.isArray(sessions) ? Array.from(new Set(sessions.flatMap((session) => session.tags))) : [];
 
   // Helper function for item icons
   const getItemIcon = (type: string) => {
