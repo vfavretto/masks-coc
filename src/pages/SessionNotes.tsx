@@ -26,6 +26,7 @@ const SessionNotes = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingSession, setEditingSession] = useState<Session | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isSlowOperation, setIsSlowOperation] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState<SessionFormData>({
@@ -162,15 +163,42 @@ const SessionNotes = () => {
         setLoading(true);
         setError(null);
         console.log('🗑️ Deleting session with ID:', id);
+        
+        // Mostrar mensagem especial para cold start
+        const startTime = Date.now();
+        
+        // Mostrar indicador de "servidor iniciando" após 10 segundos
+        const slowOperationTimer = setTimeout(() => {
+          setIsSlowOperation(true);
+        }, 10000);
+        
         const response = await sessionAPI.delete(id);
+        clearTimeout(slowOperationTimer);
+        setIsSlowOperation(false);
+        
+        const endTime = Date.now();
+        const duration = endTime - startTime;
+        
+        if (duration > 15000) {
+          console.log('🥶 Cold start detected (took ' + Math.round(duration/1000) + 's)');
+        }
+        
         console.log('✅ Delete response:', response);
         await fetchSessions(); // Refresh the list
         console.log('🔄 Sessions refreshed after delete');
       } catch (error) {
         console.error('❌ Error deleting session:', error);
-        setError('Failed to delete session: ' + (error as any).message);
+        
+        // Mensagem mais amigável para timeout
+        const isTimeout = (error as any).code === 'ECONNABORTED';
+        const errorMessage = isTimeout 
+          ? 'The server is starting up (this can take up to 60 seconds). Please try again in a moment.'
+          : 'Failed to delete session: ' + (error as any).message;
+          
+        setError(errorMessage);
       } finally {
         setLoading(false);
+        setIsSlowOperation(false);
       }
     }
   };
@@ -211,6 +239,16 @@ const SessionNotes = () => {
           >
             ×
           </button>
+        </div>
+      )}
+
+      {isSlowOperation && (
+        <div className="bg-yellow-900/50 border border-yellow-500 text-yellow-100 p-4 rounded-lg flex items-center gap-3">
+          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-yellow-400"></div>
+          <div>
+            <strong>Server is starting up...</strong>
+            <p className="text-sm text-yellow-200">This can take up to 60 seconds on the first request. Please wait.</p>
+          </div>
         </div>
       )}
 

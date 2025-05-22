@@ -21,7 +21,7 @@ console.log('🌐 API Base URL:', API_BASE_URL);
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  timeout: 60000, // Aumentar para 60 segundos (suficiente para cold start do Render)
   headers: {
     'Content-Type': 'application/json',
   },
@@ -45,8 +45,24 @@ apiClient.interceptors.response.use(
     console.log('API Response:', response.status, response.config.url);
     return response;
   },
-  (error) => {
+  async (error) => {
     console.error('API Error:', error.response?.status, error.response?.data);
+    
+    // Retry automático para cold starts (timeout ou erro 502/503)
+    const isTimeoutError = error.code === 'ECONNABORTED';
+    const isServerError = error.response?.status >= 502 && error.response?.status <= 504;
+    const shouldRetry = isTimeoutError || isServerError;
+    
+    if (shouldRetry && !error.config._retry) {
+      console.log('🔄 API Cold start detected, retrying in 5 seconds...');
+      error.config._retry = true;
+      
+      // Aguardar 5 segundos antes de tentar novamente
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      
+      return apiClient(error.config);
+    }
+    
     return Promise.reject(error);
   }
 );
@@ -69,6 +85,19 @@ export const sessionAPI = {
   create: (data: any) => apiClient.post('/sessions', data),
   update: (id: string, data: any) => apiClient.put(`/sessions/${id}`, data),
   delete: (id: string) => apiClient.delete(`/sessions/${id}`)
+};
+
+// Função para "acordar" o backend (warm-up)
+export const warmUpServer = async () => {
+  try {
+    console.log('🌡️ Warming up server...');
+    await apiClient.get('/health');
+    console.log('✅ Server is warm');
+    return true;
+  } catch (error) {
+    console.log('❄️ Server is cold, will take longer...');
+    return false;
+  }
 };
 
 export default apiClient; 
