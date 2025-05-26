@@ -25,6 +25,7 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: false, // Não enviar cookies (não necessário para esta aplicação)
 });
 
 // Request interceptor for debugging
@@ -42,11 +43,18 @@ apiClient.interceptors.request.use(
 // Response interceptor for error handling
 apiClient.interceptors.response.use(
   (response) => {
-    console.log('API Response:', response.status, response.config.url);
+    console.log('✅ API Response:', response.status, response.config.url);
     return response;
   },
   async (error) => {
-    console.error('API Error:', error.response?.status, error.response?.data);
+    console.error('❌ API Error:', error.response?.status, error.response?.data);
+    console.error('❌ Error details:', {
+      message: error.message,
+      code: error.code,
+      url: error.config?.url,
+      method: error.config?.method,
+      headers: error.config?.headers
+    });
     
     // Retry automático para cold starts (timeout ou erro 502/503)
     const isTimeoutError = error.code === 'ECONNABORTED';

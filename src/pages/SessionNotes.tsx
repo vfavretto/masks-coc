@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { sessionAPI } from '../services/api';
 import { Session, SessionFormData } from '../types';
+import { testBackendConnection, testCORS } from '../utils/testConnection';
 
 const SessionNotes = () => {
   const [sessions, setSessions] = useState<Session[]>([]);
@@ -140,10 +141,17 @@ const SessionNotes = () => {
       setLoading(true);
       setError(null);
       
+      // Limpar IDs dos clues e items antes de enviar (backend não espera esses campos)
+      const cleanFormData = {
+        ...formData,
+        clues: formData.clues.map(({ id, ...clue }) => clue),
+        items: formData.items.map(({ id, ...item }) => item)
+      };
+      
       if (editingSession) {
-        await sessionAPI.update(editingSession.id, formData);
+        await sessionAPI.update(editingSession.id, cleanFormData);
       } else {
-        await sessionAPI.create(formData);
+        await sessionAPI.create(cleanFormData);
       }
       
       await fetchSessions(); // Refresh the list
@@ -287,6 +295,18 @@ const SessionNotes = () => {
             <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-primary w-4 h-4" />
           </div>
           
+          <button 
+            className="flex items-center gap-2 px-3 py-2 bg-blue-800 hover:bg-blue-700 transition-colors duration-300 rounded-lg border border-blue-600"
+            onClick={async () => {
+              console.log('🧪 Running connection tests...');
+              await testBackendConnection();
+              await testCORS();
+            }}
+            disabled={loading}
+            title="Test backend connection"
+          >
+            <div className="w-4 h-4">🧪</div>
+          </button>
           <button 
             className="flex items-center gap-2 px-4 py-2 bg-primary/20 hover:bg-primary/30 transition-colors duration-300 rounded-lg border border-primary/20"
             onClick={handleCreateNew}
