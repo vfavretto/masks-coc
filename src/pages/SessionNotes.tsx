@@ -21,6 +21,7 @@ import { sessionAPI } from '../services/api';
 import { Session, SessionFormData } from '../types';
 import { testBackendConnection, testCORS } from '../utils/testConnection';
 import MarkdownEditor from '../components/MarkdownEditor';
+import ImageModal from '../components/ImageModal';
 
 const SessionNotes = () => {
   const [sessions, setSessions] = useState<Session[]>([]);
@@ -33,6 +34,7 @@ const SessionNotes = () => {
   const [error, setError] = useState<string | null>(null);
   const [isSlowOperation, setIsSlowOperation] = useState(false);
   const [activeTab, setActiveTab] = useState<'notes' | 'clues' | 'items'>('notes');
+  const [imageModal, setImageModal] = useState<{ src: string; alt: string } | null>(null);
 
   // Form state
   const [formData, setFormData] = useState<SessionFormData>({
@@ -127,9 +129,16 @@ const SessionNotes = () => {
 
   const handleEdit = (session: Session) => {
     setEditingSession(session);
+    
+    // Converter a data para o formato correto do input date (YYYY-MM-DD)
+    const formatDateForInput = (dateString: string) => {
+      const date = new Date(dateString);
+      return date.toISOString().split('T')[0];
+    };
+    
     setFormData({
       title: session.title,
-      date: session.date,
+      date: formatDateForInput(session.date),
       location: session.location,
       summary: session.summary,
       details: session.details,
@@ -342,12 +351,17 @@ const SessionNotes = () => {
               <div className="flex flex-col md:flex-row gap-6">
                 {session.images.length > 0 && (
                   <div className="md:w-64 flex-shrink-0">
-                    <div className="relative">
+                    <div className="relative cursor-pointer group" onClick={() => setImageModal({ src: session.images[0], alt: session.title })}>
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
+                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity z-20 flex items-center justify-center">
+                        <div className="bg-black/70 rounded-full p-2">
+                          <Search className="w-6 h-6 text-white" />
+                        </div>
+                      </div>
                       <img
                         src={session.images[0]}
                         alt={session.title}
-                        className="w-full h-48 object-cover rounded-lg border border-primary/20"
+                        className="w-full h-48 object-cover rounded-lg border border-primary/20 transition-transform group-hover:scale-105"
                         onError={(e) => {
                           e.currentTarget.src = 'https://via.placeholder.com/400x300?text=No+Image';
                         }}
@@ -484,14 +498,22 @@ const SessionNotes = () => {
                           >
                             <div className="flex items-start gap-4">
                               {clue.image && (
-                                <img
-                                  src={clue.image}
-                                  alt={clue.name}
-                                  className="w-20 h-20 object-cover rounded border border-primary/20"
-                                  onError={(e) => {
-                                    e.currentTarget.style.display = 'none';
-                                  }}
-                                />
+                                <div 
+                                  className="cursor-pointer group relative"
+                                  onClick={() => setImageModal({ src: clue.image!, alt: clue.name })}
+                                >
+                                  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity rounded flex items-center justify-center">
+                                    <Search className="w-4 h-4 text-white" />
+                                  </div>
+                                  <img
+                                    src={clue.image}
+                                    alt={clue.name}
+                                    className="w-20 h-20 object-cover rounded border border-primary/20 transition-transform group-hover:scale-105"
+                                    onError={(e) => {
+                                      e.currentTarget.style.display = 'none';
+                                    }}
+                                  />
+                                </div>
                               )}
                               <div className="flex-1">
                                 <div className="flex items-start justify-between mb-2">
@@ -965,6 +987,14 @@ const SessionNotes = () => {
           </div>
         </div>
       )}
+
+      {/* Image Modal */}
+      <ImageModal
+        src={imageModal?.src || ''}
+        alt={imageModal?.alt || ''}
+        isOpen={!!imageModal}
+        onClose={() => setImageModal(null)}
+      />
     </div>
   );
 };
