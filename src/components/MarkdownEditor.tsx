@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Eye, Edit3, Bold, Italic, List, Link } from 'lucide-react';
@@ -23,13 +23,12 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   readOnly = false
 }) => {
   const [isPreview, setIsPreview] = useState(readOnly);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const insertMarkdown = (before: string, after: string = '') => {
-    if (readOnly) return;
+    if (readOnly || !textareaRef.current) return;
     
-    const textarea = document.querySelector('textarea') as HTMLTextAreaElement;
-    if (!textarea) return;
-
+    const textarea = textareaRef.current;
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
     const selectedText = value.substring(start, end);
@@ -116,11 +115,11 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
             <ReactMarkdown 
               remarkPlugins={[remarkGfm]}
               components={{
-                p: ({ children }) => <p className="mb-3 text-gray-300">{children}</p>,
+                p: ({ children }) => <p className="mb-3 text-gray-300 last:mb-0">{children}</p>,
                 strong: ({ children }) => <strong className="text-primary font-semibold">{children}</strong>,
                 em: ({ children }) => <em className="text-gray-200 italic">{children}</em>,
-                ul: ({ children }) => <ul className="list-disc list-inside mb-3 text-gray-300">{children}</ul>,
-                ol: ({ children }) => <ol className="list-decimal list-inside mb-3 text-gray-300">{children}</ol>,
+                ul: ({ children }) => <ul className="list-disc list-inside mb-3 text-gray-300 last:mb-0">{children}</ul>,
+                ol: ({ children }) => <ol className="list-decimal list-inside mb-3 text-gray-300 last:mb-0">{children}</ol>,
                 li: ({ children }) => <li className="mb-1">{children}</li>,
                 a: ({ children, href }) => (
                   <a href={href} className="text-primary hover:text-primary/80 underline" target="_blank" rel="noopener noreferrer">
@@ -142,11 +141,12 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
                 ),
               }}
             >
-              {value || (readOnly ? '' : '*No content to preview*')}
+              {value || (readOnly ? '*No content*' : '*No content to preview*')}
             </ReactMarkdown>
           </div>
         ) : (
           <textarea
+            ref={textareaRef}
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder}

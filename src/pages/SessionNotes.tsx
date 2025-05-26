@@ -836,13 +836,17 @@ const SessionNotes = () => {
                         </div>
                       </div>
                       
-                      <div className="prose prose-invert prose-sm max-w-none">
+                      <div>
+                        <label className="block text-gray-400 text-sm mb-1">Description</label>
                         <MarkdownEditor
                           value={clue.description}
-                          onChange={() => {}} // Read-only in view mode
-                          placeholder=""
-                          rows={1}
-                          readOnly={true}
+                          onChange={(value) => {
+                            const newClues = [...formData.clues];
+                            newClues[index] = { ...newClues[index], description: value };
+                            setFormData(prev => ({ ...prev, clues: newClues }));
+                          }}
+                          placeholder="Describe this clue..."
+                          rows={3}
                         />
                       </div>
                     </div>
@@ -923,12 +927,16 @@ const SessionNotes = () => {
                       </div>
                       
                       <div>
+                        <label className="block text-gray-400 text-sm mb-1">Description</label>
                         <MarkdownEditor
                           value={item.description}
-                          onChange={() => {}} // Read-only in view mode
-                          placeholder=""
-                          rows={1}
-                          readOnly={true}
+                          onChange={(value) => {
+                            const newItems = [...formData.items];
+                            newItems[index] = { ...newItems[index], description: value };
+                            setFormData(prev => ({ ...prev, items: newItems }));
+                          }}
+                          placeholder="Describe this item..."
+                          rows={3}
                         />
                       </div>
                     </div>
