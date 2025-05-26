@@ -54,6 +54,9 @@ export interface Clue {
     name: string;
     description: string;
     type: string;
+    image?: string;
+    tag?: string;
+    location?: string;
 }
 
 export interface Item {

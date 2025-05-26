@@ -12,11 +12,15 @@ import {
   Edit,
   Trash2,
   X,
-  Save
+  Save,
+  FileText,
+  Search as SearchIcon,
+  Package
 } from 'lucide-react';
 import { sessionAPI } from '../services/api';
 import { Session, SessionFormData } from '../types';
 import { testBackendConnection, testCORS } from '../utils/testConnection';
+import MarkdownEditor from '../components/MarkdownEditor';
 
 const SessionNotes = () => {
   const [sessions, setSessions] = useState<Session[]>([]);
@@ -28,6 +32,7 @@ const SessionNotes = () => {
   const [editingSession, setEditingSession] = useState<Session | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSlowOperation, setIsSlowOperation] = useState(false);
+  const [activeTab, setActiveTab] = useState<'notes' | 'clues' | 'items'>('notes');
 
   // Form state
   const [formData, setFormData] = useState<SessionFormData>({
@@ -112,6 +117,7 @@ const SessionNotes = () => {
       items: []
     });
     setEditingSession(null);
+    setActiveTab('notes'); // Reset to notes tab
   };
 
   const handleCreateNew = () => {
@@ -413,24 +419,111 @@ const SessionNotes = () => {
               {/* Expanded content */}
               {expandedSession === session.id && (
                 <div className="mt-6 pt-6 border-t border-gray-800">
-                  <p className="text-gray-300 mb-6 font-serif">{session.details}</p>
-                  
-                  <div className="grid md:grid-cols-2 gap-6">
-                    {/* Clues */}
+                  {/* Tabs */}
+                  <div className="flex border-b border-gray-700 mb-6">
+                    <button
+                      onClick={() => setActiveTab('notes')}
+                      className={`px-4 py-2 font-medium transition-colors flex items-center gap-2 ${
+                        activeTab === 'notes'
+                          ? 'text-primary border-b-2 border-primary'
+                          : 'text-gray-400 hover:text-gray-300'
+                      }`}
+                    >
+                      <FileText className="w-4 h-4" />
+                      Session Notes
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('clues')}
+                      className={`px-4 py-2 font-medium transition-colors flex items-center gap-2 ${
+                        activeTab === 'clues'
+                          ? 'text-primary border-b-2 border-primary'
+                          : 'text-gray-400 hover:text-gray-300'
+                      }`}
+                    >
+                      <SearchIcon className="w-4 h-4" />
+                      Clues ({session.clues.length})
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('items')}
+                      className={`px-4 py-2 font-medium transition-colors flex items-center gap-2 ${
+                        activeTab === 'items'
+                          ? 'text-primary border-b-2 border-primary'
+                          : 'text-gray-400 hover:text-gray-300'
+                      }`}
+                    >
+                      <Package className="w-4 h-4" />
+                      Items ({session.items.length})
+                    </button>
+                  </div>
+
+                  {/* Tab Content */}
+                  {activeTab === 'notes' && (
+                    <div className="space-y-4">
+                      <div className="prose prose-invert max-w-none">
+                        <MarkdownEditor
+                          value={session.details}
+                          onChange={() => {}} // Read-only in view mode
+                          placeholder=""
+                          rows={1}
+                          readOnly={true}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {activeTab === 'clues' && (
                     <div className="space-y-4">
                       <h3 className="text-xl font-[MedievalSharp] text-primary flex items-center gap-2">
-                        <Skull className="w-5 h-5" /> Discovered Clues ({session.clues.length})
+                        <Skull className="w-5 h-5" /> Discovered Clues
                       </h3>
-                      <div className="space-y-3">
+                      <div className="grid gap-4">
                         {session.clues.length > 0 ? session.clues.map((clue) => (
                           <div 
                             key={clue.id}
-                            className="flex items-start gap-3 p-3 bg-black/30 rounded-lg border border-primary/10 hover:border-primary/30 transition-colors duration-300"
+                            className="p-4 bg-black/30 rounded-lg border border-primary/10 hover:border-primary/30 transition-colors duration-300"
                           >
-                            <span className="text-2xl">{getItemIcon(clue.type)}</span>
-                            <div>
-                              <h4 className="font-serif font-semibold text-gray-200">{clue.name}</h4>
-                              <p className="text-gray-400 text-sm">{clue.description}</p>
+                            <div className="flex items-start gap-4">
+                              {clue.image && (
+                                <img
+                                  src={clue.image}
+                                  alt={clue.name}
+                                  className="w-20 h-20 object-cover rounded border border-primary/20"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = 'none';
+                                  }}
+                                />
+                              )}
+                              <div className="flex-1">
+                                <div className="flex items-start justify-between mb-2">
+                                  <h4 className="font-serif font-semibold text-gray-200 text-lg">{clue.name}</h4>
+                                  <span className="text-2xl">{getItemIcon(clue.type)}</span>
+                                </div>
+                                
+                                <div className="space-y-2 mb-3">
+                                  {clue.tag && (
+                                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary/20 border border-primary/30 rounded text-sm text-primary">
+                                      <Tag className="w-3 h-3" />
+                                      {clue.tag}
+                                    </span>
+                                  )}
+                                  {clue.location && (
+                                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-700/50 border border-gray-600 rounded text-sm text-gray-300 ml-2">
+                                      <MapPin className="w-3 h-3" />
+                                      {clue.location}
+                                    </span>
+                                  )}
+                                </div>
+                                
+                                <div className="prose prose-invert prose-sm max-w-none">
+                                  <MarkdownEditor
+                                    value={clue.description}
+                                    onChange={() => {}} // Read-only in view mode
+                                    placeholder=""
+                                    rows={1}
+                                    readOnly={true}
+                                  />
+                                </div>
+                              </div>
                             </div>
                           </div>
                         )) : (
@@ -438,22 +531,31 @@ const SessionNotes = () => {
                         )}
                       </div>
                     </div>
+                  )}
 
-                    {/* Items */}
+                  {activeTab === 'items' && (
                     <div className="space-y-4">
                       <h3 className="text-xl font-[MedievalSharp] text-primary flex items-center gap-2">
-                        <Skull className="w-5 h-5" /> Collected Items ({session.items.length})
+                        <Package className="w-5 h-5" /> Collected Items
                       </h3>
-                      <div className="space-y-3">
+                      <div className="grid gap-4">
                         {session.items.length > 0 ? session.items.map((item) => (
                           <div 
                             key={item.id}
                             className="flex items-start gap-3 p-3 bg-black/30 rounded-lg border border-primary/10 hover:border-primary/30 transition-colors duration-300"
                           >
                             <span className="text-2xl">{getItemIcon(item.type)}</span>
-                            <div>
+                            <div className="flex-1">
                               <h4 className="font-serif font-semibold text-gray-200">{item.name}</h4>
-                              <p className="text-gray-400 text-sm">{item.description}</p>
+                              <div className="prose prose-invert prose-sm max-w-none">
+                                <MarkdownEditor
+                                  value={item.description}
+                                  onChange={() => {}} // Read-only in view mode
+                                  placeholder=""
+                                  rows={1}
+                                  readOnly={true}
+                                />
+                              </div>
                             </div>
                           </div>
                         )) : (
@@ -461,7 +563,7 @@ const SessionNotes = () => {
                         )}
                       </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               )}
             </div>
@@ -523,22 +625,22 @@ const SessionNotes = () => {
                 </div>
 
                 <div>
-                  <label className="block text-gray-300 mb-2">Summary</label>
-                  <textarea
+                  <MarkdownEditor
                     value={formData.summary}
-                    onChange={(e) => setFormData(prev => ({ ...prev, summary: e.target.value }))}
-                    className="w-full bg-black/30 border border-primary/20 rounded p-3 text-white h-24"
-                    required
+                    onChange={(value) => setFormData(prev => ({ ...prev, summary: value }))}
+                    placeholder="Brief summary of the session..."
+                    label="Summary"
+                    rows={4}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-gray-300 mb-2">Details</label>
-                  <textarea
+                  <MarkdownEditor
                     value={formData.details}
-                    onChange={(e) => setFormData(prev => ({ ...prev, details: e.target.value }))}
-                    className="w-full bg-black/30 border border-primary/20 rounded p-3 text-white h-48"
-                    required
+                    onChange={(value) => setFormData(prev => ({ ...prev, details: value }))}
+                    placeholder="Detailed notes about the session..."
+                    label="Details"
+                    rows={8}
                   />
                 </div>
 
@@ -619,7 +721,15 @@ const SessionNotes = () => {
                       onClick={() => {
                         setFormData(prev => ({
                           ...prev,
-                          clues: [...prev.clues, { id: crypto.randomUUID(), name: '', description: '', type: 'evidence' }]
+                          clues: [...prev.clues, { 
+                            id: crypto.randomUUID(), 
+                            name: '', 
+                            description: '', 
+                            type: 'evidence',
+                            image: '',
+                            tag: '',
+                            location: ''
+                          }]
                         }));
                       }}
                       className="px-3 py-1 bg-primary/20 hover:bg-primary/30 rounded-lg border border-primary/20 flex items-center gap-2"
@@ -630,65 +740,110 @@ const SessionNotes = () => {
                   </div>
                   
                   {formData.clues.map((clue, index) => (
-                    <div key={clue.id || index} className="grid grid-cols-12 gap-2 mb-2 items-center">
-                      <div className="col-span-4">
-                        <input
-                          type="text"
-                          value={clue.name}
-                          onChange={(e) => {
-                            const newClues = [...formData.clues];
-                            newClues[index] = { ...newClues[index], name: e.target.value };
-                            setFormData(prev => ({ ...prev, clues: newClues }));
-                          }}
-                          placeholder="Clue name"
-                          className="w-full bg-black/30 border border-primary/20 rounded p-2 text-white"
-                          required
-                        />
+                    <div key={clue.id || index} className="mb-6 p-4 bg-black/20 rounded-lg border border-primary/10">
+                      <div className="grid grid-cols-12 gap-3 mb-3">
+                        <div className="col-span-6">
+                          <label className="block text-gray-400 text-sm mb-1">Name *</label>
+                          <input
+                            type="text"
+                            value={clue.name}
+                            onChange={(e) => {
+                              const newClues = [...formData.clues];
+                              newClues[index] = { ...newClues[index], name: e.target.value };
+                              setFormData(prev => ({ ...prev, clues: newClues }));
+                            }}
+                            placeholder="Clue name"
+                            className="w-full bg-black/30 border border-primary/20 rounded p-2 text-white"
+                            required
+                          />
+                        </div>
+                        <div className="col-span-3">
+                          <label className="block text-gray-400 text-sm mb-1">Type</label>
+                          <select
+                            value={clue.type}
+                            onChange={(e) => {
+                              const newClues = [...formData.clues];
+                              newClues[index] = { ...newClues[index], type: e.target.value };
+                              setFormData(prev => ({ ...prev, clues: newClues }));
+                            }}
+                            className="w-full bg-black/30 border border-primary/20 rounded p-2 text-white"
+                            required
+                          >
+                            <option value="evidence">Evidence</option>
+                            <option value="document">Document</option>
+                            <option value="witness">Witness</option>
+                            <option value="location">Location</option>
+                          </select>
+                        </div>
+                        <div className="col-span-2">
+                          <label className="block text-gray-400 text-sm mb-1">Tag</label>
+                          <input
+                            type="text"
+                            value={clue.tag || ''}
+                            onChange={(e) => {
+                              const newClues = [...formData.clues];
+                              newClues[index] = { ...newClues[index], tag: e.target.value };
+                              setFormData(prev => ({ ...prev, clues: newClues }));
+                            }}
+                            placeholder="Tag"
+                            className="w-full bg-black/30 border border-primary/20 rounded p-2 text-white"
+                          />
+                        </div>
+                        <div className="col-span-1 flex items-end">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setFormData(prev => ({
+                                ...prev,
+                                clues: prev.clues.filter((_, i) => i !== index)
+                              }));
+                            }}
+                            className="p-2 text-gray-400 hover:text-red-500 transition-colors duration-300"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
-                      <div className="col-span-5">
-                        <input
-                          type="text"
+                      
+                      <div className="grid grid-cols-2 gap-3 mb-3">
+                        <div>
+                          <label className="block text-gray-400 text-sm mb-1">Image URL</label>
+                          <input
+                            type="text"
+                            value={clue.image || ''}
+                            onChange={(e) => {
+                              const newClues = [...formData.clues];
+                              newClues[index] = { ...newClues[index], image: e.target.value };
+                              setFormData(prev => ({ ...prev, clues: newClues }));
+                            }}
+                            placeholder="https://..."
+                            className="w-full bg-black/30 border border-primary/20 rounded p-2 text-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-gray-400 text-sm mb-1">Location</label>
+                          <input
+                            type="text"
+                            value={clue.location || ''}
+                            onChange={(e) => {
+                              const newClues = [...formData.clues];
+                              newClues[index] = { ...newClues[index], location: e.target.value };
+                              setFormData(prev => ({ ...prev, clues: newClues }));
+                            }}
+                            placeholder="Where was this found?"
+                            className="w-full bg-black/30 border border-primary/20 rounded p-2 text-white"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="prose prose-invert prose-sm max-w-none">
+                        <MarkdownEditor
                           value={clue.description}
-                          onChange={(e) => {
-                            const newClues = [...formData.clues];
-                            newClues[index] = { ...newClues[index], description: e.target.value };
-                            setFormData(prev => ({ ...prev, clues: newClues }));
-                          }}
-                          placeholder="Description"
-                          className="w-full bg-black/30 border border-primary/20 rounded p-2 text-white"
-                          required
+                          onChange={() => {}} // Read-only in view mode
+                          placeholder=""
+                          rows={1}
+                          readOnly={true}
                         />
-                      </div>
-                      <div className="col-span-2">
-                        <select
-                          value={clue.type}
-                          onChange={(e) => {
-                            const newClues = [...formData.clues];
-                            newClues[index] = { ...newClues[index], type: e.target.value };
-                            setFormData(prev => ({ ...prev, clues: newClues }));
-                          }}
-                          className="w-full bg-black/30 border border-primary/20 rounded p-2 text-white"
-                          required
-                        >
-                          <option value="evidence">Evidence</option>
-                          <option value="document">Document</option>
-                          <option value="witness">Witness</option>
-                          <option value="location">Location</option>
-                        </select>
-                      </div>
-                      <div className="col-span-1">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setFormData(prev => ({
-                              ...prev,
-                              clues: prev.clues.filter((_, i) => i !== index)
-                            }));
-                          }}
-                          className="p-2 text-gray-400 hover:text-red-500 transition-colors duration-300"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
                       </div>
                     </div>
                   ))}
@@ -714,67 +869,67 @@ const SessionNotes = () => {
                   </div>
                   
                   {formData.items.map((item, index) => (
-                    <div key={item.id || index} className="grid grid-cols-12 gap-2 mb-2 items-center">
-                      <div className="col-span-4">
-                        <input
-                          type="text"
-                          value={item.name}
-                          onChange={(e) => {
-                            const newItems = [...formData.items];
-                            newItems[index] = { ...newItems[index], name: e.target.value };
-                            setFormData(prev => ({ ...prev, items: newItems }));
-                          }}
-                          placeholder="Item name"
-                          className="w-full bg-black/30 border border-primary/20 rounded p-2 text-white"
-                          required
-                        />
+                    <div key={item.id || index} className="mb-6 p-4 bg-black/20 rounded-lg border border-primary/10">
+                      <div className="grid grid-cols-12 gap-3 mb-3">
+                        <div className="col-span-6">
+                          <label className="block text-gray-400 text-sm mb-1">Name *</label>
+                          <input
+                            type="text"
+                            value={item.name}
+                            onChange={(e) => {
+                              const newItems = [...formData.items];
+                              newItems[index] = { ...newItems[index], name: e.target.value };
+                              setFormData(prev => ({ ...prev, items: newItems }));
+                            }}
+                            placeholder="Item name"
+                            className="w-full bg-black/30 border border-primary/20 rounded p-2 text-white"
+                            required
+                          />
+                        </div>
+                        <div className="col-span-5">
+                          <label className="block text-gray-400 text-sm mb-1">Type</label>
+                          <select
+                            value={item.type}
+                            onChange={(e) => {
+                              const newItems = [...formData.items];
+                              newItems[index] = { ...newItems[index], type: e.target.value };
+                              setFormData(prev => ({ ...prev, items: newItems }));
+                            }}
+                            className="w-full bg-black/30 border border-primary/20 rounded p-2 text-white"
+                            required
+                          >
+                            <option value="tool">Tool</option>
+                            <option value="key">Key</option>
+                            <option value="weapon">Weapon</option>
+                            <option value="book">Book</option>
+                            <option value="artifact">Artifact</option>
+                            <option value="document">Document</option>
+                          </select>
+                        </div>
+                        <div className="col-span-1 flex items-end">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setFormData(prev => ({
+                                ...prev,
+                                items: prev.items.filter((_, i) => i !== index)
+                              }));
+                            }}
+                            className="p-2 text-gray-400 hover:text-red-500 transition-colors duration-300"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
-                      <div className="col-span-5">
-                        <input
-                          type="text"
+                      
+                      <div>
+                        <MarkdownEditor
                           value={item.description}
-                          onChange={(e) => {
-                            const newItems = [...formData.items];
-                            newItems[index] = { ...newItems[index], description: e.target.value };
-                            setFormData(prev => ({ ...prev, items: newItems }));
-                          }}
-                          placeholder="Description"
-                          className="w-full bg-black/30 border border-primary/20 rounded p-2 text-white"
-                          required
+                          onChange={() => {}} // Read-only in view mode
+                          placeholder=""
+                          rows={1}
+                          readOnly={true}
                         />
-                      </div>
-                      <div className="col-span-2">
-                        <select
-                          value={item.type}
-                          onChange={(e) => {
-                            const newItems = [...formData.items];
-                            newItems[index] = { ...newItems[index], type: e.target.value };
-                            setFormData(prev => ({ ...prev, items: newItems }));
-                          }}
-                          className="w-full bg-black/30 border border-primary/20 rounded p-2 text-white"
-                          required
-                        >
-                          <option value="tool">Tool</option>
-                          <option value="key">Key</option>
-                          <option value="weapon">Weapon</option>
-                          <option value="book">Book</option>
-                          <option value="artifact">Artifact</option>
-                          <option value="document">Document</option>
-                        </select>
-                      </div>
-                      <div className="col-span-1">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setFormData(prev => ({
-                              ...prev,
-                              items: prev.items.filter((_, i) => i !== index)
-                            }));
-                          }}
-                          className="p-2 text-gray-400 hover:text-red-500 transition-colors duration-300"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
                       </div>
                     </div>
                   ))}
