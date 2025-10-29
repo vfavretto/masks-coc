@@ -166,10 +166,8 @@ const SessionNotes = () => {
       // Limpar IDs dos clues e items antes de enviar (backend não espera esses campos)
       const cleanFormData = {
         ...formData,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        clues: formData.clues.map(({ id: _id, ...clue }) => clue),
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        items: formData.items.map(({ id: _id, ...item }) => item)
+        clues: formData.clues.map(({ id: _, ...clue }) => clue),
+        items: formData.items.map(({ id: _, ...item }) => item)
       };
       
       if (editingSession) {

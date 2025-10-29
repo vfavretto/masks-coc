@@ -45,7 +45,9 @@ const InvestigationBoard: React.FC<InvestigationBoardProps> = ({ nodes, setNodes
 
     // Schedule update on next frame
     rafRef.current = requestAnimationFrame(() => {
-      const boardRect = boardRef.current!.getBoundingClientRect();
+      const boardRect = boardRef.current?.getBoundingClientRect();
+      if (!boardRect) return;
+      
       const newX = e.clientX - boardRect.left - dragOffset.x;
       const newY = e.clientY - boardRect.top - dragOffset.y;
 

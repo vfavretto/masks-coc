@@ -119,9 +119,9 @@ export const warmUpServer = async () => {
       console.log('✅ Server is warm');
     }
     return true;
-  } catch {
+  } catch (error) {
     if (import.meta.env.DEV) {
-      console.log('❄️ Server is cold, will take longer...');
+      console.log('❄️ Server is cold, will take longer...', error);
     }
     return false;
   }
