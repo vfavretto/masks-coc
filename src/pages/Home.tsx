@@ -18,17 +18,26 @@ import galleryImg1 from "../../assets/img/TelegrafoPeru.jpeg";
 import galleryImg2 from "../../assets/img/TelegrafoJackson.jpeg";
 
 const Home = () => {
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
   useEffect(() => {
     const textElements = document.querySelectorAll(".flicker");
+    const intervals: NodeJS.Timeout[] = [];
+    
     textElements.forEach((element) => {
-      setInterval(() => {
+      const interval = setInterval(() => {
         if (element instanceof HTMLElement) {
           element.style.opacity = Math.random() < 0.97 ? "1" : "0";
         }
       }, 2000);
+      intervals.push(interval);
     });
+
+    // Cleanup intervals when component unmounts
+    return () => {
+      intervals.forEach(interval => clearInterval(interval));
+    };
   }, []);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   return (
     <div className="space-y-12 relative min-h-screen">

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { 
   Search, 
   Skull, 
@@ -81,7 +81,7 @@ const Characters = () => {
         console.error('Error message:', error.message);
       }
       if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as any;
+        const axiosError = error as { response?: { status?: number; data?: unknown } };
         console.error('Response status:', axiosError.response?.status);
         console.error('Response data:', axiosError.response?.data);
       }
@@ -97,11 +97,16 @@ const Characters = () => {
     fetchCharacters();
   }, []);
 
-  // Filter characters - garantir que characters é sempre um array
-  const filteredCharacters = Array.isArray(characters) ? characters.filter((character) =>
-    character.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    character.occupation.toLowerCase().includes(searchTerm.toLowerCase())
-  ) : [];
+  // Ensure characters is always an array and memoize filtered results
+  const safeCharacters = useMemo(() => Array.isArray(characters) ? characters : [], [characters]);
+
+  // Filter characters - memoized for performance
+  const filteredCharacters = useMemo(() => {
+    return safeCharacters.filter((character) =>
+      character.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      character.occupation.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [safeCharacters, searchTerm]);
 
   // Helper functions for icons
   const getSkillIcon = (category: string) => {
@@ -219,10 +224,10 @@ const Characters = () => {
     }));
   };
 
-  const updateSkill = (index: number, field: keyof Skill, value: any) => {
+  const updateSkill = (index: number, field: keyof Skill, value: string | number) => {
     setFormData(prev => {
       const newSkills = [...prev.skills];
-      newSkills[index] = { ...newSkills[index], [field]: field === 'value' ? parseInt(value) : value };
+      newSkills[index] = { ...newSkills[index], [field]: field === 'value' ? parseInt(value as string) : value };
       return { ...prev, skills: newSkills };
     });
   };
@@ -242,7 +247,7 @@ const Characters = () => {
     }));
   };
 
-  const updateEquipment = (index: number, field: keyof Equipment, value: any) => {
+  const updateEquipment = (index: number, field: keyof Equipment, value: string) => {
     setFormData(prev => {
       const newEquipment = [...prev.equipment];
       newEquipment[index] = { ...newEquipment[index], [field]: value };
@@ -292,7 +297,7 @@ const Characters = () => {
     }));
   };
 
-  if (loading && characters.length === 0) {
+  if (loading && safeCharacters.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-64">
         <div className="text-primary text-lg">Loading investigators...</div>
@@ -370,7 +375,7 @@ const Characters = () => {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
               <p className="text-gray-400">Carregando investigadores...</p>
             </div>
-          ) : characters.length === 0 ? (
+          ) : safeCharacters.length === 0 ? (
             <div className="text-center space-y-3">
               <Skull className="w-16 h-16 text-gray-600 mx-auto" />
               <p className="text-gray-400">Nenhum investigador encontrado.</p>
@@ -911,7 +916,7 @@ const Characters = () => {
                       <div className="col-span-2">
                         <select
                           value={item.type}
-                          onChange={(e) => updateEquipment(index, 'type', e.target.value as any)}
+                          onChange={(e) => updateEquipment(index, 'type', e.target.value)}
                           className="w-full bg-black/30 border border-primary/20 rounded p-2 text-white"
                           required
                         >

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { CharacterFormData, SessionFormData } from '../types';
 
 // Configuração automática da URL da API baseada no ambiente
 const getApiBaseUrl = () => {
@@ -17,7 +18,9 @@ const getApiBaseUrl = () => {
 };
 
 const API_BASE_URL = getApiBaseUrl();
-console.log('🌐 API Base URL:', API_BASE_URL);
+if (import.meta.env.DEV) {
+  console.log('🌐 API Base URL:', API_BASE_URL);
+}
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -31,11 +34,15 @@ const apiClient = axios.create({
 // Request interceptor for debugging
 apiClient.interceptors.request.use(
   (config) => {
-    console.log('API Request:', config.method?.toUpperCase(), config.url);
+    if (import.meta.env.DEV) {
+      console.log('API Request:', config.method?.toUpperCase(), config.url);
+    }
     return config;
   },
   (error) => {
-    console.error('Request Error:', error);
+    if (import.meta.env.DEV) {
+      console.error('Request Error:', error);
+    }
     return Promise.reject(error);
   }
 );
@@ -43,18 +50,22 @@ apiClient.interceptors.request.use(
 // Response interceptor for error handling
 apiClient.interceptors.response.use(
   (response) => {
-    console.log('✅ API Response:', response.status, response.config.url);
+    if (import.meta.env.DEV) {
+      console.log('✅ API Response:', response.status, response.config.url);
+    }
     return response;
   },
   async (error) => {
-    console.error('❌ API Error:', error.response?.status, error.response?.data);
-    console.error('❌ Error details:', {
-      message: error.message,
-      code: error.code,
-      url: error.config?.url,
-      method: error.config?.method,
-      headers: error.config?.headers
-    });
+    if (import.meta.env.DEV) {
+      console.error('❌ API Error:', error.response?.status, error.response?.data);
+      console.error('❌ Error details:', {
+        message: error.message,
+        code: error.code,
+        url: error.config?.url,
+        method: error.config?.method,
+        headers: error.config?.headers
+      });
+    }
     
     // Retry automático para cold starts (timeout ou erro 502/503)
     const isTimeoutError = error.code === 'ECONNABORTED';
@@ -62,7 +73,9 @@ apiClient.interceptors.response.use(
     const shouldRetry = isTimeoutError || isServerError;
     
     if (shouldRetry && !error.config._retry) {
-      console.log('🔄 API Cold start detected, retrying in 5 seconds...');
+      if (import.meta.env.DEV) {
+        console.log('🔄 API Cold start detected, retrying in 5 seconds...');
+      }
       error.config._retry = true;
       
       // Aguardar 5 segundos antes de tentar novamente
@@ -79,8 +92,8 @@ apiClient.interceptors.response.use(
 export const characterAPI = {
   getAll: () => apiClient.get('/characters'),
   getById: (id: string) => apiClient.get(`/characters/${id}`),
-  create: (data: any) => apiClient.post('/characters', data),
-  update: (id: string, data: any) => apiClient.put(`/characters/${id}`, data),
+  create: (data: CharacterFormData) => apiClient.post('/characters', data),
+  update: (id: string, data: Partial<CharacterFormData>) => apiClient.put(`/characters/${id}`, data),
   delete: (id: string) => apiClient.delete(`/characters/${id}`)
 };
 
@@ -90,20 +103,26 @@ export const sessionAPI = {
   getById: (id: string) => apiClient.get(`/sessions/${id}`),
   search: (query: string) => apiClient.get(`/sessions/search?q=${query}`),
   getByTags: (tags: string[]) => apiClient.get(`/sessions/tags?tags=${tags.join(',')}`),
-  create: (data: any) => apiClient.post('/sessions', data),
-  update: (id: string, data: any) => apiClient.put(`/sessions/${id}`, data),
+  create: (data: SessionFormData) => apiClient.post('/sessions', data),
+  update: (id: string, data: Partial<SessionFormData>) => apiClient.put(`/sessions/${id}`, data),
   delete: (id: string) => apiClient.delete(`/sessions/${id}`)
 };
 
 // Função para "acordar" o backend (warm-up)
 export const warmUpServer = async () => {
   try {
-    console.log('🌡️ Warming up server...');
+    if (import.meta.env.DEV) {
+      console.log('🌡️ Warming up server...');
+    }
     await apiClient.get('/health');
-    console.log('✅ Server is warm');
+    if (import.meta.env.DEV) {
+      console.log('✅ Server is warm');
+    }
     return true;
-  } catch (error) {
-    console.log('❄️ Server is cold, will take longer...');
+  } catch {
+    if (import.meta.env.DEV) {
+      console.log('❄️ Server is cold, will take longer...');
+    }
     return false;
   }
 };
