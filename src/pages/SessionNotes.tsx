@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { 
   Search, 
   Calendar, 
@@ -77,17 +77,24 @@ const SessionNotes = () => {
     fetchSessions();
   }, []);
 
-  // Filter sessions - garantir que sessions é sempre um array
-  const filteredSessions = Array.isArray(sessions) ? sessions.filter((session) => {
-    const matchesSearch = session.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      session.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      session.summary.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesTag = selectedTag ? session.tags.includes(selectedTag) : true;
-    return matchesSearch && matchesTag;
-  }) : [];
+  // Ensure sessions is always an array and memoize filtered results
+  const safeSessions = useMemo(() => Array.isArray(sessions) ? sessions : [], [sessions]);
 
-  // Get all unique tags - garantir que sessions é um array
-  const allTags = Array.isArray(sessions) ? Array.from(new Set(sessions.flatMap((session) => session.tags))) : [];
+  // Filter sessions - memoized for performance
+  const filteredSessions = useMemo(() => {
+    return safeSessions.filter((session) => {
+      const matchesSearch = session.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        session.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        session.summary.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesTag = selectedTag ? session.tags.includes(selectedTag) : true;
+      return matchesSearch && matchesTag;
+    });
+  }, [safeSessions, searchTerm, selectedTag]);
+
+  // Get all unique tags - memoized for performance
+  const allTags = useMemo(() => {
+    return Array.from(new Set(safeSessions.flatMap((session) => session.tags)));
+  }, [safeSessions]);
 
   // Helper function for item icons
   const getItemIcon = (type: string) => {
@@ -159,8 +166,8 @@ const SessionNotes = () => {
       // Limpar IDs dos clues e items antes de enviar (backend não espera esses campos)
       const cleanFormData = {
         ...formData,
-        clues: formData.clues.map(({ id, ...clue }) => clue),
-        items: formData.items.map(({ id, ...item }) => item)
+        clues: formData.clues.map(({ id: _, ...clue }) => clue),
+        items: formData.items.map(({ id: _, ...item }) => item)
       };
       
       if (editingSession) {
@@ -213,10 +220,11 @@ const SessionNotes = () => {
         console.error('❌ Error deleting session:', error);
         
         // Mensagem mais amigável para timeout
-        const isTimeout = (error as any).code === 'ECONNABORTED';
+        const axiosError = error as { code?: string; message?: string };
+        const isTimeout = axiosError.code === 'ECONNABORTED';
         const errorMessage = isTimeout 
           ? 'The server is starting up (this can take up to 60 seconds). Please try again in a moment.'
-          : 'Failed to delete session: ' + (error as any).message;
+          : 'Failed to delete session: ' + (axiosError.message || 'Unknown error');
           
         setError(errorMessage);
       } finally {
@@ -243,7 +251,7 @@ const SessionNotes = () => {
     }));
   };
 
-  if (loading && sessions.length === 0) {
+  if (loading && safeSessions.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-64">
         <div className="text-primary text-lg">Loading sessions...</div>
@@ -337,7 +345,7 @@ const SessionNotes = () => {
       {filteredSessions.length === 0 ? (
         <div className="flex justify-center items-center h-64">
           <p className="text-gray-400">
-            {sessions.length === 0 ? 'No sessions found. Create your first session!' : 'No sessions match your criteria.'}
+            {safeSessions.length === 0 ? 'No sessions found. Create your first session!' : 'No sessions match your criteria.'}
           </p>
         </div>
       ) : (

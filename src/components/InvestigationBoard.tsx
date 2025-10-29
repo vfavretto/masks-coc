@@ -1,4 +1,4 @@
-import { useState, useRef, MouseEvent } from 'react';
+import { useState, useRef, MouseEvent, useCallback } from 'react';
 import { Pin, FileText, User, MapPin, Link as LinkIcon, Plus } from 'lucide-react';
 import { Node, Connection } from '../types/index';
 
@@ -19,6 +19,7 @@ const InvestigationBoard: React.FC<InvestigationBoardProps> = ({ nodes, setNodes
   const [draggedNode, setDraggedNode] = useState<number | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const boardRef = useRef<HTMLDivElement>(null);
+  const rafRef = useRef<number | null>(null);
 
   const handleMouseDown = (e: MouseEvent<HTMLDivElement>, nodeId: number) => {
     const node = nodes.find(n => n.id === nodeId);
@@ -33,24 +34,39 @@ const InvestigationBoard: React.FC<InvestigationBoardProps> = ({ nodes, setNodes
     });
   };
 
-  const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
+  // Throttle mouse move with requestAnimationFrame for better performance
+  const handleMouseMove = useCallback((e: MouseEvent<HTMLDivElement>) => {
     if (!isDragging || !draggedNode || !boardRef.current) return;
 
-    const boardRect = boardRef.current.getBoundingClientRect();
-    const newX = e.clientX - boardRect.left - dragOffset.x;
-    const newY = e.clientY - boardRect.top - dragOffset.y;
+    // Cancel any pending RAF
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+    }
 
-    setNodes(nodes.map(node => 
-      node.id === draggedNode 
-        ? { ...node, x: Math.max(0, Math.min(newX, boardRect.width - 200)), y: Math.max(0, Math.min(newY, boardRect.height - 100)) }
-        : node
-    ));
-  };
+    // Schedule update on next frame
+    rafRef.current = requestAnimationFrame(() => {
+      const boardRect = boardRef.current?.getBoundingClientRect();
+      if (!boardRect) return;
+      
+      const newX = e.clientX - boardRect.left - dragOffset.x;
+      const newY = e.clientY - boardRect.top - dragOffset.y;
 
-  const handleMouseUp = () => {
+      setNodes(nodes.map(node => 
+        node.id === draggedNode 
+          ? { ...node, x: Math.max(0, Math.min(newX, boardRect.width - 200)), y: Math.max(0, Math.min(newY, boardRect.height - 100)) }
+          : node
+      ));
+    });
+  }, [isDragging, draggedNode, dragOffset, nodes, setNodes]);
+
+  const handleMouseUp = useCallback(() => {
     setIsDragging(false);
     setDraggedNode(null);
-  };
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+  }, []);
 
   const getNodeIcon = (type: Node['type']) => {
     switch (type) {
