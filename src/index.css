@@ -1,34 +1,145 @@
+/* 
+ * Masks of Nyarlathotep - Design System
+ * Estilo: Neo-Noir Lovecraftiano
+ * Cores baseadas em tons de ouro envelhecido, papel antigo e sombras profundas
+ */
+
+/* Fontes devem vir antes de qualquer @tailwind */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 20 14% 4%;
-    --foreground: 60 9.1% 97.8%;
-    --primary: 20 89.1% 52%;
-    --primary-foreground: 60 9.1% 97.8%;
+    /* Neo-Noir Lovecraftiano Theme */
+    --background: 20 10% 4%;           /* Preto profundo com tom quente */
+    --foreground: 40 15% 90%;          /* Tom de pergaminho para texto */
+    
+    --primary: 38 65% 50%;             /* Ouro envelhecido #c9a55c */
+    --primary-foreground: 20 10% 4%;   /* Texto escuro sobre ouro */
+    
+    --card: 20 8% 8%;                  /* Superfície de cards levemente mais clara */
+    --card-foreground: 40 15% 90%;
+    
+    --popover: 20 10% 6%;              /* Popovers e menus */
+    --popover-foreground: 40 15% 90%;
+    
+    --secondary: 20 6% 15%;            /* Elementos secundários */
+    --secondary-foreground: 40 10% 80%;
+    
+    --muted: 20 5% 12%;                /* Elementos desativados/sutis */
+    --muted-foreground: 30 5% 50%;
+    
+    --accent: 38 65% 50%;              /* Mesmo que primary para consistência */
+    --accent-foreground: 20 10% 4%;
+    
+    --destructive: 0 50% 35%;          /* Vermelho sangue seco */
+    --destructive-foreground: 0 0% 95%;
+    
+    --border: 30 8% 18%;               /* Bordas sutis */
+    --input: 20 8% 12%;                /* Fundo de inputs */
+    --ring: 38 65% 50%;                /* Anel de foco dourado */
+    
+    /* Charts - tons harmoniosos */
+    --chart-1: 38 65% 50%;             /* Ouro */
+    --chart-2: 20 40% 30%;             /* Marrom */
+    --chart-3: 180 15% 35%;            /* Verde cinza */
+    --chart-4: 0 40% 40%;              /* Vermelho */
+    --chart-5: 45 50% 45%;             /* Âmbar */
+    
+    --radius: 0.5rem;
   }
 
+  /* O design é sempre dark mode */
+  
+  * {
+    @apply border-border;
+  }
+  
   body {
-    @apply bg-[#0a0908] text-gray-200 font-[Crimson_Text];
+    @apply bg-background text-foreground font-serif antialiased;
+    font-family: 'Crimson Pro', serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', serif;
+    @apply font-semibold tracking-tight;
+  }
+
+  /* Scrollbar personalizada */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-background;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/50;
   }
 }
 
 @layer components {
+  /* Classes utilitárias customizadas para manter retrocompatibilidade */
   .nav-link {
-    @apply px-4 py-2 text-gray-300 hover:text-primary transition-colors duration-200;
+    @apply px-4 py-2 text-muted-foreground hover:text-primary transition-colors duration-300;
   }
 
-  .card {
-    @apply bg-gray-900/50 rounded-lg p-6 backdrop-blur-sm border border-gray-800;
+  /* Card legado com efeito de blur */
+  .card-legacy {
+    @apply bg-card/50 rounded-lg p-6 backdrop-blur-sm border border-border 
+           hover:border-primary/30 transition-all duration-300;
   }
 
   .heading {
     @apply text-3xl font-bold text-primary mb-6;
   }
 
-  .button {
-    @apply px-4 py-2 bg-primary text-white rounded hover:bg-primary/80 transition-colors duration-200;
+  .button-legacy {
+    @apply px-4 py-2 bg-primary text-primary-foreground rounded-md 
+           hover:bg-primary/80 transition-colors duration-300;
+  }
+
+  /* Efeito de brilho sutil */
+  .glow {
+    @apply shadow-[0_0_15px_rgba(201,165,92,0.15)];
+  }
+
+  .glow-hover:hover {
+    @apply shadow-[0_0_25px_rgba(201,165,92,0.25)];
+  }
+
+  /* Efeito de flicker para textos místicos */
+  .flicker {
+    animation: flicker 4s infinite alternate;
+  }
+
+  @keyframes flicker {
+    0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+      opacity: 1;
+    }
+    20%, 24%, 55% {
+      opacity: 0.8;
+    }
+  }
+}
+
+@layer utilities {
+  /* Animações de transição suaves */
+  .transition-theme {
+    @apply transition-all duration-300 ease-in-out;
+  }
+
+  /* Fundo com gradiente para seções */
+  .bg-section {
+    @apply bg-gradient-to-b from-background via-card/30 to-background;
   }
 }

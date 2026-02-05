@@ -28,9 +28,14 @@ const apiClient = axios.create({
   withCredentials: false, // Não enviar cookies (não necessário para esta aplicação)
 });
 
-// Request interceptor for debugging
+// Request interceptor for debugging and auth
 apiClient.interceptors.request.use(
   (config) => {
+    // Add auth token if available
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     console.log('API Request:', config.method?.toUpperCase(), config.url);
     return config;
   },
