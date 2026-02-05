@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { Scroll, Search, Plus, ChevronDown } from 'lucide-react';
 import { useSessions } from '@/hooks/useSessions';
 import { SessionCard, SessionForm } from '@/features/sessions';
@@ -23,6 +24,146 @@ const SessionNotes = () => {
     formData,
     allTags,
     imageModal,
+=======
+import { useState, useEffect, useMemo } from 'react';
+import { 
+  Search, 
+  Calendar, 
+  Tag, 
+  Scroll, 
+  MapPin, 
+  ChevronDown, 
+  ChevronRight, 
+  Skull, 
+  Plus,
+  Edit,
+  Trash2,
+  X,
+  Save,
+  FileText,
+  Search as SearchIcon,
+  Package
+} from 'lucide-react';
+import { sessionAPI } from '../services/api';
+import { Session, SessionFormData } from '../types';
+import { testBackendConnection, testCORS } from '../utils/testConnection';
+import MarkdownEditor from '../components/MarkdownEditor';
+import ImageModal from '../components/ImageModal';
+
+const SessionNotes = () => {
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedTag, setSelectedTag] = useState('');
+  const [expandedSession, setExpandedSession] = useState<string | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [editingSession, setEditingSession] = useState<Session | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isSlowOperation, setIsSlowOperation] = useState(false);
+  const [activeTab, setActiveTab] = useState<'notes' | 'clues' | 'items'>('notes');
+  const [imageModal, setImageModal] = useState<{ src: string; alt: string } | null>(null);
+
+  // Form state
+  const [formData, setFormData] = useState<SessionFormData>({
+    title: '',
+    date: new Date().toISOString().split('T')[0],
+    location: '',
+    summary: '',
+    details: '',
+    tags: [],
+    images: [],
+    clues: [],
+    items: []
+  });
+
+  // Fetch sessions from API
+  const fetchSessions = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await sessionAPI.getAll();
+      
+      console.log('📦 Sessions API Response:', response);
+      console.log('📋 Sessions Data:', response.data);
+      
+      // Validar se response.data é um array
+      const sessionsData = Array.isArray(response.data) ? response.data : [];
+      console.log('✅ Sessions Array:', sessionsData);
+      
+      setSessions(sessionsData);
+    } catch (error) {
+      console.error('Error fetching sessions:', error);
+      setError('Failed to load sessions');
+      setSessions([]); // Garantir que seja um array vazio em caso de erro
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSessions();
+  }, []);
+
+  // Ensure sessions is always an array and memoize filtered results
+  const safeSessions = useMemo(() => Array.isArray(sessions) ? sessions : [], [sessions]);
+
+  // Filter sessions - memoized for performance
+  const filteredSessions = useMemo(() => {
+    return safeSessions.filter((session) => {
+      const matchesSearch = session.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        session.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        session.summary.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesTag = selectedTag ? session.tags.includes(selectedTag) : true;
+      return matchesSearch && matchesTag;
+    });
+  }, [safeSessions, searchTerm, selectedTag]);
+
+  // Get all unique tags - memoized for performance
+  const allTags = useMemo(() => {
+    return Array.from(new Set(safeSessions.flatMap((session) => session.tags)));
+  }, [safeSessions]);
+
+  // Helper function for item icons
+  const getItemIcon = (type: string) => {
+    switch (type) {
+      case 'document': return '📜';
+      case 'evidence': return '🔍';
+      case 'key': return '🗝️';
+      case 'book': return '📚';
+      case 'weapon': return '🗡️';
+      case 'tool': return '🔧';
+      case 'artifact': return '🏺';
+      case 'witness': return '👁️';
+      case 'location': return '📍';
+      default: return '📦';
+    }
+  };
+
+  // Form handlers
+  const resetForm = () => {
+    setFormData({
+      title: '',
+      date: new Date().toISOString().split('T')[0],
+      location: '',
+      summary: '',
+      details: '',
+      tags: [],
+      images: [],
+      clues: [],
+      items: []
+    });
+    setEditingSession(null);
+    setActiveTab('notes'); // Reset to notes tab
+  };
+
+  const handleCreateNew = () => {
+    resetForm();
+    setShowModal(true);
+  };
+
+  const handleEdit = (session: Session) => {
+    setEditingSession(session);
+>>>>>>> 32e2be8d11ca913036da63f2d56aad9d9caca78a
     
     setSearchTerm,
     setSelectedTag,
@@ -32,6 +173,7 @@ const SessionNotes = () => {
     setActiveTab,
     setImageModal,
     
+<<<<<<< HEAD
     fetchSessions,
     handleCreateNew,
     handleEdit,
@@ -51,6 +193,117 @@ const SessionNotes = () => {
 
   // Loading State
   if (loading && sessions.length === 0) {
+=======
+    setFormData({
+      title: session.title,
+      date: formatDateForInput(session.date),
+      location: session.location,
+      summary: session.summary,
+      details: session.details,
+      tags: session.tags,
+      images: session.images,
+      clues: session.clues,
+      items: session.items
+    });
+    setShowModal(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Limpar IDs dos clues e items antes de enviar (backend não espera esses campos)
+      const cleanFormData = {
+        ...formData,
+        clues: formData.clues.map(({ id: _, ...clue }) => clue),
+        items: formData.items.map(({ id: _, ...item }) => item)
+      };
+      
+      if (editingSession) {
+        await sessionAPI.update(editingSession.id, cleanFormData);
+      } else {
+        await sessionAPI.create(cleanFormData);
+      }
+      
+      await fetchSessions(); // Refresh the list
+      setShowModal(false);
+      resetForm();
+    } catch (error) {
+      console.error('Error saving session:', error);
+      setError('Failed to save session');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: string, title: string) => {
+    if (window.confirm(`Are you sure you want to delete "${title}"?`)) {
+      try {
+        setLoading(true);
+        setError(null);
+        console.log('🗑️ Deleting session with ID:', id);
+        
+        // Mostrar mensagem especial para cold start
+        const startTime = Date.now();
+        
+        // Mostrar indicador de "servidor iniciando" após 10 segundos
+        const slowOperationTimer = setTimeout(() => {
+          setIsSlowOperation(true);
+        }, 10000);
+        
+        const response = await sessionAPI.delete(id);
+        clearTimeout(slowOperationTimer);
+        setIsSlowOperation(false);
+        
+        const endTime = Date.now();
+        const duration = endTime - startTime;
+        
+        if (duration > 15000) {
+          console.log('🥶 Cold start detected (took ' + Math.round(duration/1000) + 's)');
+        }
+        
+        console.log('✅ Delete response:', response);
+        await fetchSessions(); // Refresh the list
+        console.log('🔄 Sessions refreshed after delete');
+      } catch (error) {
+        console.error('❌ Error deleting session:', error);
+        
+        // Mensagem mais amigável para timeout
+        const axiosError = error as { code?: string; message?: string };
+        const isTimeout = axiosError.code === 'ECONNABORTED';
+        const errorMessage = isTimeout 
+          ? 'The server is starting up (this can take up to 60 seconds). Please try again in a moment.'
+          : 'Failed to delete session: ' + (axiosError.message || 'Unknown error');
+          
+        setError(errorMessage);
+      } finally {
+        setLoading(false);
+        setIsSlowOperation(false);
+      }
+    }
+  };
+
+  // Helper function to add tags
+  const addTag = (tag: string) => {
+    if (tag && !formData.tags.includes(tag)) {
+      setFormData(prev => ({
+        ...prev,
+        tags: [...prev.tags, tag]
+      }));
+    }
+  };
+
+  const removeTag = (tag: string) => {
+    setFormData(prev => ({
+      ...prev,
+      tags: prev.tags.filter(t => t !== tag)
+    }));
+  };
+
+  if (loading && safeSessions.length === 0) {
+>>>>>>> 32e2be8d11ca913036da63f2d56aad9d9caca78a
     return (
       <div className="space-y-8">
         <div className="flex justify-between items-center">
@@ -153,10 +406,16 @@ const SessionNotes = () => {
 
       {/* Sessions List */}
       {filteredSessions.length === 0 ? (
+<<<<<<< HEAD
         <div className="flex flex-col justify-center items-center h-64 space-y-4">
           <Scroll className="w-16 h-16 text-muted-foreground" />
           <p className="text-muted-foreground">
             {sessions.length === 0 ? 'No sessions found. Create your first session!' : 'No sessions match your criteria.'}
+=======
+        <div className="flex justify-center items-center h-64">
+          <p className="text-gray-400">
+            {safeSessions.length === 0 ? 'No sessions found. Create your first session!' : 'No sessions match your criteria.'}
+>>>>>>> 32e2be8d11ca913036da63f2d56aad9d9caca78a
           </p>
           {sessions.length === 0 && (
             <Button onClick={handleCreateNew} disabled={loading}>

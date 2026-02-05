@@ -20,7 +20,11 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
 
+<<<<<<< HEAD
     /* Path alias */
+=======
+    /* Path Aliases */
+>>>>>>> 32e2be8d11ca913036da63f2d56aad9d9caca78a
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]

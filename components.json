@@ -10,6 +10,7 @@
     "cssVariables": true,
     "prefix": ""
   },
+<<<<<<< HEAD
   "iconLibrary": "lucide",
   "rtl": false,
   "aliases": {
@@ -21,3 +22,12 @@
   },
   "registries": {}
 }
+=======
+  "aliases": {
+    "components": "@/components",
+    "utils": "@/lib/utils",
+    "ui": "@/components/ui"
+  }
+}
+
+>>>>>>> 32e2be8d11ca913036da63f2d56aad9d9caca78a

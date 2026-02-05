@@ -13,6 +13,7 @@
 
 @layer base {
   :root {
+<<<<<<< HEAD
     /* Neo-Noir Lovecraftiano Theme */
     --background: 20 10% 4%;           /* Preto profundo com tom quente */
     --foreground: 40 15% 90%;          /* Tom de pergaminho para texto */
@@ -50,6 +51,33 @@
     --chart-5: 45 50% 45%;             /* Âmbar */
     
     --radius: 0.5rem;
+=======
+    /* Dark horror theme - cores inspiradas em Call of Cthulhu */
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 7%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 5%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 10 78% 45%; /* Vermelho sangue envelhecido */
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 10 78% 45%;
+    --radius: 0.5rem;
+  }
+
+  * {
+    @apply border-border;
+>>>>>>> 32e2be8d11ca913036da63f2d56aad9d9caca78a
   }
 
   /* O design é sempre dark mode */
@@ -59,6 +87,7 @@
   }
   
   body {
+<<<<<<< HEAD
     @apply bg-background text-foreground font-serif antialiased;
     font-family: 'Crimson Pro', serif;
   }
@@ -84,12 +113,16 @@
 
   ::-webkit-scrollbar-thumb:hover {
     @apply bg-muted-foreground/50;
+=======
+    @apply bg-background text-foreground font-sans;
+>>>>>>> 32e2be8d11ca913036da63f2d56aad9d9caca78a
   }
 }
 
 @layer components {
   /* Classes utilitárias customizadas para manter retrocompatibilidade */
   .nav-link {
+<<<<<<< HEAD
     @apply px-4 py-2 text-muted-foreground hover:text-primary transition-colors duration-300;
   }
 
@@ -97,15 +130,30 @@
   .card-legacy {
     @apply bg-card/50 rounded-lg p-6 backdrop-blur-sm border border-border 
            hover:border-primary/30 transition-all duration-300;
+=======
+    @apply px-4 py-2 text-muted-foreground hover:text-primary transition-colors duration-200;
+>>>>>>> 32e2be8d11ca913036da63f2d56aad9d9caca78a
   }
 
   .heading {
-    @apply text-3xl font-bold text-primary mb-6;
+    @apply text-3xl font-bold text-primary mb-6 font-heading;
   }
+}
 
+<<<<<<< HEAD
   .button-legacy {
     @apply px-4 py-2 bg-primary text-primary-foreground rounded-md 
            hover:bg-primary/80 transition-colors duration-300;
+=======
+/* Estilos customizados para o tema de terror */
+@layer utilities {
+  .text-shadow-glow {
+    text-shadow: 0 0 10px hsl(var(--primary) / 0.5);
+  }
+  
+  .bg-texture {
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+>>>>>>> 32e2be8d11ca913036da63f2d56aad9d9caca78a
   }
 
   /* Efeito de brilho sutil */

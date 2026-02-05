@@ -1,2 +1,2 @@
 # masks-coc
-A blog for Masks of Nyarlathotep campaign
+A blog for Masks of Nyarlathotep campaign -- Under construction 🧱🚧🚨
